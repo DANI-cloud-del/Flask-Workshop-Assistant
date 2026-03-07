@@ -444,7 +444,8 @@ function Check-Checkpoint3 {
         $utilityMatches = ([regex]::Matches($htmlContent, "(bg-|text-|p-|m-|flex|grid)")).Count
         
         if ($utilityMatches -gt 3) {
-            Write-Success "Using Tailwind utilities ($utilityMatches classes)"
+            $classCount = $utilityMatches
+            Write-Success "Using Tailwind utilities: $classCount classes"
         }
         else {
             Write-Warning-Custom "Few utility classes found"
