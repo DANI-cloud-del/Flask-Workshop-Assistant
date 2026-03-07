@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask Workshop - Tailwind</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <div class="container mx-auto px-4 py-16">
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-5xl font-bold text-indigo-600 mb-4">
+                Welcome to Flask! 🚀
+            </h1>
+            <p class="text-xl text-gray-700">
+                Built with Tailwind CSS
+            </p>
+        </header>
+        
+        <!-- Card -->
+        <div class="max-w-2xl mx-auto">
+            <div class="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow duration-300">
+                <h2 class="text-3xl font-semibold text-gray-800 mb-4">
+                    Your First Flask App
+                </h2>
+                <p class="text-gray-600 mb-6">
+                    This is a beautiful Flask application styled with Tailwind CSS utility classes.
+                </p>
+                
+                <!-- Button -->
+                <button class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200">
+                    Get Started
+                </button>
+            </div>
+        </div>
+        
+        <!-- Features Grid -->
+        <div class="grid md:grid-cols-3 gap-6 mt-12 max-w-4xl mx-auto">
+            <div class="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow">
+                <div class="text-4xl mb-3">🎨</div>
+                <h3 class="text-lg font-semibold mb-2">Beautiful Design</h3>
+                <p class="text-gray-600 text-sm">Tailwind CSS utility classes</p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow">
+                <div class="text-4xl mb-3">⚡</div>
+                <h3 class="text-lg font-semibold mb-2">Fast Development</h3>
+                <p class="text-gray-600 text-sm">Build quickly with Flask</p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow">
+                <div class="text-4xl mb-3">🚀</div>
+                <h3 class="text-lg font-semibold mb-2">Easy Deployment</h3>
+                <p class="text-gray-600 text-sm">Deploy anywhere</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
