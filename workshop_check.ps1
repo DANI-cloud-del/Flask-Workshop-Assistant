@@ -16,15 +16,15 @@ $WORKSPACE = "student_workspace"
 $AUTO_FIX = -not $ManualMode
 
 # Color functions
-function Write-Success { param($msg) Write-Host "✅ $msg" -ForegroundColor Green }
-function Write-Error-Custom { param($msg) Write-Host "❌ $msg" -ForegroundColor Red }
-function Write-Warning-Custom { param($msg) Write-Host "⚠️  $msg" -ForegroundColor Yellow }
-function Write-Info { param($msg) Write-Host "ℹ️  $msg" -ForegroundColor Cyan }
+function Write-Success { param($msg) Write-Host "[OK] $msg" -ForegroundColor Green }
+function Write-Error-Custom { param($msg) Write-Host "[ERROR] $msg" -ForegroundColor Red }
+function Write-Warning-Custom { param($msg) Write-Host "[WARN] $msg" -ForegroundColor Yellow }
+function Write-Info { param($msg) Write-Host "[INFO] $msg" -ForegroundColor Cyan }
 
 function Print-Header {
-    Write-Host "╭────────────────────────────────────────────────────╮" -ForegroundColor Blue
-    Write-Host "│  Flask Workshop - Checkpoint $Checkpoint Validator          │" -ForegroundColor Blue
-    Write-Host "╰────────────────────────────────────────────────────╯" -ForegroundColor Blue
+    Write-Host "===================================================" -ForegroundColor Blue
+    Write-Host "  Flask Workshop - Checkpoint $Checkpoint Validator" -ForegroundColor Blue
+    Write-Host "===================================================" -ForegroundColor Blue
     Write-Host ""
 }
 
@@ -44,8 +44,8 @@ function Show-OfflineHelp {
     param($error)
     
     Write-Host ""
-    Write-Host "📚 Offline Help:" -ForegroundColor Yellow
-    Write-Host "─────────────────────────────────────────────────────"
+    Write-Host "Offline Help:" -ForegroundColor Yellow
+    Write-Host "-----------------------------------------------------"
     
     if ($error -match "flask|module") {
         Write-Host @"
@@ -72,7 +72,7 @@ Fix: Change port in app.py:
         Write-Host "Raise your hand for instructor help!"
     }
     
-    Write-Host "─────────────────────────────────────────────────────"
+    Write-Host "-----------------------------------------------------"
     Write-Host ""
 }
 
@@ -97,7 +97,7 @@ function Check-Checkpoint1 {
     Set-Location $WORKSPACE
     
     # Check 1: Python
-    Write-Host "📋 Check 1/6: Python Installation"
+    Write-Host "Check 1/6: Python Installation"
     try {
         $pythonVersion = python --version 2>&1
         Write-Success "Python found: $pythonVersion"
@@ -114,7 +114,7 @@ function Check-Checkpoint1 {
     Write-Host ""
     
     # Check 2: Virtual environment
-    Write-Host "📋 Check 2/6: Virtual Environment"
+    Write-Host "Check 2/6: Virtual Environment"
     if (Test-Path "venv") {
         Write-Success "Virtual environment found"
     }
@@ -145,7 +145,7 @@ function Check-Checkpoint1 {
     Write-Host ""
     
     # Check 3: Virtual environment activation
-    Write-Host "📋 Check 3/6: Virtual Environment Activation"
+    Write-Host "Check 3/6: Virtual Environment Activation"
     if ($env:VIRTUAL_ENV) {
         Write-Success "Virtual environment is activated"
     }
@@ -165,7 +165,7 @@ function Check-Checkpoint1 {
     Write-Host ""
     
     # Check 4: Flask installed
-    Write-Host "📋 Check 4/6: Flask Installation"
+    Write-Host "Check 4/6: Flask Installation"
     try {
         $null = python -c "import flask" 2>&1
         $flaskVersion = python -c "import flask; print(flask.__version__)" 2>&1
@@ -194,7 +194,7 @@ function Check-Checkpoint1 {
     Write-Host ""
     
     # Check 5: Project structure
-    Write-Host "📋 Check 5/6: Project Structure"
+    Write-Host "Check 5/6: Project Structure"
     $missingDirs = @()
     
     if (-not (Test-Path "templates")) { $missingDirs += "templates" }
@@ -204,7 +204,7 @@ function Check-Checkpoint1 {
         Write-Success "Project structure correct"
     }
     else {
-        Write-Error-Custom "Missing: $($missingDirs -join ', ')"
+        Write-Error-Custom "Missing folders: $($missingDirs -join ', ')"
         
         if (Prompt-Fix) {
             foreach ($dir in $missingDirs) {
@@ -219,7 +219,7 @@ function Check-Checkpoint1 {
     Write-Host ""
     
     # Check 6: Git
-    Write-Host "📋 Check 6/6: Git Repository"
+    Write-Host "Check 6/6: Git Repository"
     if (Test-Path ".git") {
         Write-Success "Git repository initialized"
     }
@@ -230,17 +230,17 @@ function Check-Checkpoint1 {
     
     # Final verdict
     if ($allPassed) {
-        Write-Host "╭────────────────────────────────────────────────────╮" -ForegroundColor Green
-        Write-Host "│  ✅ CHECKPOINT 1 PASSED!                          │" -ForegroundColor Green
-        Write-Host "│  Ready for Checkpoint 2                            │" -ForegroundColor Green
-        Write-Host "╰────────────────────────────────────────────────────╯" -ForegroundColor Green
+        Write-Host "===================================================" -ForegroundColor Green
+        Write-Host "  [OK] CHECKPOINT 1 PASSED!" -ForegroundColor Green
+        Write-Host "  Ready for Checkpoint 2" -ForegroundColor Green
+        Write-Host "===================================================" -ForegroundColor Green
         Write-Host ""
         Write-Info "Next: .\workshop_check.ps1 2"
         Set-Location ..
         return $true
     }
     else {
-        Write-Host "❌ CHECKPOINT 1 INCOMPLETE" -ForegroundColor Red
+        Write-Host "[ERROR] CHECKPOINT 1 INCOMPLETE" -ForegroundColor Red
         Set-Location ..
         return $false
     }
@@ -264,7 +264,7 @@ function Check-Checkpoint2 {
     $allPassed = $true
     
     # Check 1: app.py exists
-    Write-Host "📋 Check 1/5: app.py File"
+    Write-Host "Check 1/5: app.py File"
     if (Test-Path "app.py") {
         Write-Success "app.py found"
     }
@@ -294,7 +294,7 @@ if __name__ == '__main__':
     Write-Host ""
     
     # Check 2: Syntax
-    Write-Host "📋 Check 2/5: Python Syntax"
+    Write-Host "Check 2/5: Python Syntax"
     if (Test-Path "app.py") {
         try {
             python -m py_compile app.py 2>&1 | Out-Null
@@ -308,7 +308,7 @@ if __name__ == '__main__':
     Write-Host ""
     
     # Check 3: Flask import
-    Write-Host "📋 Check 3/5: Flask Import"
+    Write-Host "Check 3/5: Flask Import"
     $appContent = Get-Content "app.py" -Raw
     if ($appContent -match "from flask import Flask" -or $appContent -match "import flask") {
         Write-Success "Flask import found"
@@ -320,7 +320,7 @@ if __name__ == '__main__':
     Write-Host ""
     
     # Check 4: Route
-    Write-Host "📋 Check 4/5: Route Definition"
+    Write-Host "Check 4/5: Route Definition"
     if ($appContent -match "@app\.route") {
         Write-Success "Route found"
     }
@@ -331,8 +331,8 @@ if __name__ == '__main__':
     Write-Host ""
     
     # Check 5: Can run
-    Write-Host "📋 Check 5/5: App Runnable"
-    Write-Info "Testing if app starts (5 sec test)..."
+    Write-Host "Check 5/5: App Runnable"
+    Write-Info "Testing if app starts (3 sec test)..."
     
     $job = Start-Job -ScriptBlock {
         param($workspace)
@@ -354,13 +354,13 @@ if __name__ == '__main__':
     Write-Host ""
     
     if ($allPassed) {
-        Write-Host "✅ CHECKPOINT 2 PASSED!" -ForegroundColor Green
+        Write-Host "[OK] CHECKPOINT 2 PASSED!" -ForegroundColor Green
         Write-Info "Next: .\workshop_check.ps1 3"
         Set-Location ..
         return $true
     }
     else {
-        Write-Host "❌ CHECKPOINT 2 INCOMPLETE" -ForegroundColor Red
+        Write-Host "[ERROR] CHECKPOINT 2 INCOMPLETE" -ForegroundColor Red
         Set-Location ..
         return $false
     }
@@ -385,7 +385,7 @@ function Check-Checkpoint3 {
     $templateFile = ""
     
     # Check 1: Template exists
-    Write-Host "📋 Check 1/4: HTML Template"
+    Write-Host "Check 1/4: HTML Template"
     if (Test-Path "templates\index.html") {
         $templateFile = "templates\index.html"
         Write-Success "Template found"
@@ -424,7 +424,7 @@ function Check-Checkpoint3 {
     Write-Host ""
     
     # Check 2: Tailwind CDN
-    Write-Host "📋 Check 2/4: Tailwind CDN"
+    Write-Host "Check 2/4: Tailwind CDN"
     if ($templateFile -and (Test-Path $templateFile)) {
         $htmlContent = Get-Content $templateFile -Raw
         if ($htmlContent -match "cdn\.tailwindcss\.com") {
@@ -438,7 +438,7 @@ function Check-Checkpoint3 {
     Write-Host ""
     
     # Check 3: Utility classes
-    Write-Host "📋 Check 3/4: Tailwind Classes"
+    Write-Host "Check 3/4: Tailwind Classes"
     if ($templateFile -and (Test-Path $templateFile)) {
         $htmlContent = Get-Content $templateFile -Raw
         $utilityMatches = ([regex]::Matches($htmlContent, "(bg-|text-|p-|m-|flex|grid)")).Count
@@ -454,7 +454,7 @@ function Check-Checkpoint3 {
     Write-Host ""
     
     # Check 4: Hover effects
-    Write-Host "📋 Check 4/4: Interactive Features"
+    Write-Host "Check 4/4: Interactive Features"
     if ($templateFile -and (Test-Path $templateFile)) {
         $htmlContent = Get-Content $templateFile -Raw
         if ($htmlContent -match "hover:") {
@@ -467,13 +467,13 @@ function Check-Checkpoint3 {
     Write-Host ""
     
     if ($allPassed) {
-        Write-Host "✅ CHECKPOINT 3 PASSED!" -ForegroundColor Green
+        Write-Host "[OK] CHECKPOINT 3 PASSED!" -ForegroundColor Green
         Write-Info "Next: .\workshop_check.ps1 4"
         Set-Location ..
         return $true
     }
     else {
-        Write-Host "❌ CHECKPOINT 3 INCOMPLETE" -ForegroundColor Red
+        Write-Host "[ERROR] CHECKPOINT 3 INCOMPLETE" -ForegroundColor Red
         Set-Location ..
         return $false
     }
@@ -495,7 +495,7 @@ function Check-Checkpoint4 {
     Set-Location $WORKSPACE
     
     # Check .env
-    Write-Host "📋 Check 1/3: Environment Variables"
+    Write-Host "Check 1/3: Environment Variables"
     if (Test-Path ".env") {
         Write-Success ".env file found"
         
@@ -513,7 +513,7 @@ function Check-Checkpoint4 {
     Write-Host ""
     
     # Check AI route
-    Write-Host "📋 Check 2/3: AI Endpoint"
+    Write-Host "Check 2/3: AI Endpoint"
     if (Test-Path "app.py") {
         $appContent = Get-Content "app.py" -Raw
         if ($appContent -match "/api/chat") {
@@ -525,7 +525,7 @@ function Check-Checkpoint4 {
     }
     Write-Host ""
     
-    Write-Host "🎉 ALL CHECKPOINTS COMPLETE!" -ForegroundColor Green
+    Write-Host "[OK] ALL CHECKPOINTS COMPLETE!" -ForegroundColor Green
     Write-Host ""
     Write-Info "Congratulations! Your Flask app is ready."
     Set-Location ..
