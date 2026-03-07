@@ -1,78 +1,92 @@
 # Flask Workshop Assistant 🤖
 
-An intelligent, self-healing workshop assistant that helps students learn Flask through automated validation, error detection, and AI-powered guidance.
+An intelligent assistant for Flask web development workshops with automated setup and progressive validation.
 
-## 🎯 What This Does
+## 🎯 Two Ways to Get Started
 
-- **Automated Environment Validation**: Checks Python, venv, Flask installation
-- **Self-Healing**: Auto-fixes common issues (creates folders, installs packages)
-- **Intelligent Error Detection**: Parses code, finds syntax errors, validates structure
-- **AI-Powered Help**: Explains errors and provides solutions (uses instructor's API key)
-- **Progress Tracking**: Students track their own checkpoint completion
-- **Offline Capable**: Works without internet (falls back to static help)
-- **Cross-Platform**: Detects Windows/Ubuntu and adjusts commands
+### Option 1: 🚀 Quick Setup (Recommended for Beginners)
 
-## 📋 Prerequisites
+**One command does everything!** Creates venv, installs Flask, generates starter code.
 
-### For Instructor (You)
-- Python 3.8+
-- Groq API key (free tier: 14,400 requests/day) - Get from https://console.groq.com
-- Git
-
-### For Students
-- Python 3.8+
-- Git
-- Code editor (VS Code recommended)
-
-## 🚀 Quick Start
-
-### Instructor Setup (Before Workshop)
-
-```bash
-# 1. Clone repository
+**Windows (PowerShell):**
+```powershell
 git clone https://github.com/DANI-cloud-del/Flask-Workshop-Assistant.git
 cd Flask-Workshop-Assistant
-
-# 2. Create virtual environment
-python -m venv venv
-
-# 3. Activate venv
-# Windows:
-venv\Scripts\activate
-# Ubuntu:
-source venv/bin/activate
-
-# 4. Install dependencies
-pip install -r requirements.txt
-
-# 5. Configure .env file
-cp .env.example .env
-# Edit .env and add your GROQ_API_KEY
-
-# 6. Test assistant (optional)
-python workshop_assistant.py
-# Visit: http://localhost:5002
+.\setup.ps1
 ```
 
-### Student Setup (During Workshop)
-
+**Linux/Mac (Bash):**
 ```bash
-# 1. Clone repository
 git clone https://github.com/DANI-cloud-del/Flask-Workshop-Assistant.git
-cd Flask-Workshop-Assistant/student_workspace
-
-# 2. Run checkpoint validation
-../workshop_check.sh 1
+cd Flask-Workshop-Assistant
+chmod +x setup.sh
+./setup.sh
 ```
+
+**What it creates:**
+- ✅ Virtual environment with Flask installed
+- ✅ Project folders (templates/, static/)
+- ✅ Starter `app.py` with basic route
+- ✅ Starter `index.html` with Tailwind CSS
+- ✅ Ready-to-run Flask application!
+
+### Option 2: 🎯 Step-by-Step Validation (For Learning)
+
+**Guided checkpoints** that teach Flask concepts progressively with auto-fix.
+
+**Windows:**
+```powershell
+cd Flask-Workshop-Assistant
+.\workshop_check.ps1 1  # Environment setup
+# Activate venv, then:
+.\workshop_check.ps1 2  # Flask app
+.\workshop_check.ps1 3  # Tailwind CSS  
+.\workshop_check.ps1 4  # AI integration
+```
+
+**Linux/Mac:**
+```bash
+cd Flask-Workshop-Assistant
+./workshop_check.sh 1  # Environment setup
+# Activate venv, then:
+./workshop_check.sh 2  # Flask app
+./workshop_check.sh 3  # Tailwind CSS
+./workshop_check.sh 4  # AI integration
+```
+
+## ✨ Features
+
+### 🚀 Automated Setup Scripts
+- **One-command setup** - `setup.ps1` (Windows) or `setup.sh` (Linux/Mac)
+- Creates complete Flask project structure
+- Installs all dependencies automatically
+- Generates working starter code
+
+### ✅ Progressive Validation Scripts  
+- **Checkpoint-based learning** - `workshop_check.ps1` / `workshop_check.sh`
+- Real-time environment validation
+- Auto-fix common issues
+- Step-by-step guidance with colored output
+
+### 🤖 AI Workshop Assistant (Optional)
+- Context-aware help system
+- Code examples and explanations
+- Troubleshooting support
+- Integration with student Flask apps
+
+### 🎨 Modern Tech Stack
+- Flask 3.x
+- Tailwind CSS (via CDN)
+- Groq API for AI features
+- Clean, beginner-friendly code
 
 ## 📚 Workshop Structure
 
 ### Checkpoint 1: Environment Setup (15 mins)
 - ✅ Python installation verified
-- ✅ Virtual environment created & activated
+- ✅ Virtual environment created & activated  
 - ✅ Flask installed correctly
 - ✅ Project folders created (templates/, static/)
-- ✅ Git initialized
 
 ### Checkpoint 2: First Flask App (20 mins)
 - ✅ app.py created with basic structure
@@ -92,159 +106,225 @@ cd Flask-Workshop-Assistant/student_workspace
 - ✅ API endpoint created
 - ✅ Working chat interface
 
-## 🎮 Usage
-
-### For Students
-
-**Run checkpoint validation**:
-```bash
-./workshop_check.sh [checkpoint_number]
-
-Examples:
-./workshop_check.sh 1  # Check environment setup
-./workshop_check.sh 2  # Check Flask app
-./workshop_check.sh 3  # Check Tailwind CSS
-./workshop_check.sh 4  # Check AI integration
-```
-
-**Auto-fix mode** (default - automatically fixes issues):
-```bash
-./workshop_check.sh 1
-```
-
-**Manual mode** (asks before fixing):
-```bash
-AUTO_FIX=false ./workshop_check.sh 1
-```
-
-### For Instructor
-
-**Option 1: Fully Offline (Recommended)**
-- Students run scripts locally
-- No network setup needed
-- Static help messages
-- You walk around helping
-
-**Option 2: With AI Assistant (Optional)**
-```bash
-# Start AI assistant on your laptop
-python workshop_assistant.py
-
-# Students can call your laptop IP for AI help
-# Update ASSISTANT_API in workshop_check.sh with your IP
-```
-
-## 🔧 How It Works
-
-### Self-Healing Example
-```bash
-$ ./workshop_check.sh 1
-
-📋 Check 2/6: Virtual Environment
-❌ Virtual environment not found
-ℹ️  Auto-fix enabled. Fixing...
-✅ Virtual environment created successfully!
-
-📋 Check 3/6: Virtual Environment Activation
-⚠️  Virtual environment not activated
-ℹ️  To activate:
-  Windows: venv\Scripts\activate
-  Ubuntu: source venv/bin/activate
-
-✅ CHECKPOINT 1 PASSED!
-```
-
-### Intelligent Validation
-- **File structure checks**: Validates folders exist
-- **Syntax parsing**: Uses Python AST to check code
-- **Runtime tests**: Actually tries to start Flask
-- **Cross-platform**: Detects OS and adjusts commands
-
-### AI Integration (Optional)
-- Students paste errors → get explanations
-- Uses **your** Groq API key (students don't need one)
-- Falls back to static help if offline
-- Works on local network or cloud-deployed
-
-## 📁 File Structure
+## 📁 Project Structure
 
 ```
 Flask-Workshop-Assistant/
-├── workshop_check.sh              # Main validation script
-├── workshop_assistant.py          # AI assistant API (optional)
-├── requirements.txt               # Python dependencies
-├── .env.example                   # Environment template
-├── README.md                      # This file
-│
-├── student_workspace/             # Where students work
-│   ├── app.py                     # Their Flask app
-│   ├── templates/                 # HTML templates
-│   └── static/                    # CSS, JS, images
-│
-├── solutions/                     # Reference code
-│   ├── checkpoint1/
-│   ├── checkpoint2/
-│   ├── checkpoint3/
-│   └── checkpoint4/
-│
-└── docs/                          # Guides
-    ├── SETUP_GUIDE.md
-    ├── TROUBLESHOOTING.md
-    └── COMMON_ERRORS.md
+├── setup.ps1                 # Automated setup (Windows)
+├── setup.sh                  # Automated setup (Linux/Mac)
+├── workshop_check.ps1        # Validation script (Windows)
+├── workshop_check.sh         # Validation script (Linux/Mac)
+├── workshop_assistant.py     # AI assistant server (optional)
+├── requirements.txt          # Python dependencies
+├── student_workspace/        # Where students work
+│   ├── venv/                # Virtual environment (auto-created)
+│   ├── app.py               # Flask application (auto-created)
+│   ├── templates/           # HTML templates (auto-created)
+│   │   └── index.html       # Starter template (auto-created)
+│   └── static/              # CSS, JS, images (auto-created)
+├── solutions/               # Reference solutions
+└── docs/                    # Additional documentation
 ```
 
-## 🎯 Design Philosophy
+## 👨‍🏫 For Students
 
-1. **Offline-First**: Core functionality works without internet
-2. **Self-Healing**: Auto-fixes common mistakes
-3. **Gradual Complexity**: Simple → Advanced checkpoints
-4. **Learn By Doing**: Validation guides, doesn't solve
-5. **Scalable**: Works with 5 or 50 students
+### First Time Setup
 
-## 🐛 Troubleshooting
+**Windows Users:**
+1. Install Python from [python.org](https://www.python.org/downloads/)
+   - ✅ Check "Add Python to PATH"
+2. Open PowerShell  
+3. Run:
+   ```powershell
+   git clone https://github.com/DANI-cloud-del/Flask-Workshop-Assistant.git
+   cd Flask-Workshop-Assistant
+   .\setup.ps1
+   ```
 
-### Script won't run
+**Mac/Linux Users:**
+1. Install Python 3 (usually pre-installed)
+2. Open Terminal
+3. Run:
+   ```bash
+   git clone https://github.com/DANI-cloud-del/Flask-Workshop-Assistant.git
+   cd Flask-Workshop-Assistant
+   chmod +x setup.sh
+   ./setup.sh
+   ```
+
+### Running Your Flask App
+
+```powershell
+# Windows:
+cd student_workspace
+.\venv\Scripts\Activate.ps1
+python app.py
+```
+
 ```bash
-# Make executable (Unix/Mac)
-chmod +x workshop_check.sh
-
-# Or run with bash
-bash workshop_check.sh 1
-
-# Windows (Git Bash)
-bash workshop_check.sh 1
+# Linux/Mac:
+cd student_workspace
+source venv/bin/activate
+python app.py
 ```
 
-### "Permission denied"
-```bash
-chmod +x workshop_check.sh
+Then open: **http://localhost:5000**
+
+### Common Issues
+
+**Windows Execution Policy Error:**
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
-### AI assistant not working
-- Check .env has GROQ_API_KEY
-- Verify: curl http://localhost:5002/health
-- Script still works offline with static help
+**Python Not Found:**
+- Make sure Python is installed
+- Check "Add to PATH" was selected during installation
+- Restart PowerShell/Terminal
 
-## 🎓 Learning Outcomes
+**Port 5000 Already in Use:**
+Change port in `app.py`:
+```python
+if __name__ == '__main__':
+    app.run(debug=True, port=5001)  # Changed from 5000
+```
 
-By completing all checkpoints:
-- ✅ Understand virtual environments
-- ✅ Create Flask web applications
-- ✅ Use Tailwind CSS styling
-- ✅ Integrate external APIs
-- ✅ Debug common errors
-- ✅ Follow professional workflows
+## 🎯 For Instructors
+
+### Workshop Flow Options
+
+**Option A: Fast Start (30 minutes)**
+1. Students run `setup.ps1`/`setup.sh` (5 min)
+2. Explain Flask basics (10 min)
+3. Students customize their app (15 min)
+
+**Option B: Learning Path (90 minutes)**
+1. Checkpoint 1: Environment (15 min)
+2. Checkpoint 2: First Flask app (20 min)
+3. Checkpoint 3: Styling with Tailwind (20 min)
+4. Checkpoint 4: AI integration (20 min)
+5. Q&A and customization (15 min)
+
+### Running the AI Assistant (Optional)
+
+1. **Setup:**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # Windows: .\venv\Scripts\Activate.ps1
+   pip install -r requirements.txt
+   ```
+
+2. **Configure:**
+   ```bash
+   cp .env.example .env
+   # Edit .env and add your GROQ_API_KEY
+   ```
+
+3. **Start:**
+   ```bash
+   python workshop_assistant.py
+   ```
+
+   The assistant runs on: **http://localhost:5002**
+
+### Best Practices
+
+✅ **Tell students to clone to a LOCAL folder** (not OneDrive/Desktop)
+```powershell
+# Good:
+C:\Workshop\Flask-Workshop-Assistant
+
+# Bad (OneDrive interferes with venv):
+C:\Users\Name\OneDrive\Desktop\Flask-Workshop-Assistant
+```
+
+✅ **Run scripts from repo root**, not from student_workspace
+```powershell
+# Correct:
+cd Flask-Workshop-Assistant
+.\setup.ps1
+
+# Wrong:
+cd Flask-Workshop-Assistant\student_workspace  
+..\setup.ps1
+```
+
+## 📚 Documentation
+
+- [Windows Setup Guide](WINDOWS_SETUP.md) - Detailed Windows instructions
+- [Quick Start Guide](QUICKSTART.md) - Fast track for experienced users
+- [Troubleshooting](docs/TROUBLESHOOTING.md) - Common issues and solutions
+
+## ⚙️ Requirements
+
+### For All Students:
+- Python 3.8+
+- Git (for cloning)
+- Internet connection (for package installation)
+
+### For AI Assistant (Optional):
+- Groq API key (free at [groq.com](https://groq.com))
+- Flask-CORS
+- Python-dotenv
+
+## 🛠️ Technologies Used
+
+- **Backend:** Flask 3.x
+- **Frontend:** HTML5, Tailwind CSS
+- **AI:** Groq API (Llama models)
+- **Scripting:** PowerShell, Bash
+- **Development:** Python virtual environments
+
+## 🤝 Contributing
+
+Contributions welcome! Please:
+1. Fork the repository
+2. Create a feature branch
+3. Test your changes
+4. Submit a pull request
+
+## 📜 License
+
+MIT License - free for educational use!
 
 ## 📞 Support
 
-- Issues: GitHub Issues tab
-- Documentation: `docs/` folder
-- Workshop prep: See `docs/SETUP_GUIDE.md`
+- GitHub Issues: [Report bugs](https://github.com/DANI-cloud-del/Flask-Workshop-Assistant/issues)
+- Discussions: [Ask questions](https://github.com/DANI-cloud-del/Flask-Workshop-Assistant/discussions)
 
-## 📄 License
+## 🎓 Learning Outcomes
 
-MIT License - Free for educational use
+By completing all checkpoints, students will:
+- ✅ Understand Python virtual environments
+- ✅ Create Flask web applications
+- ✅ Use Tailwind CSS for styling
+- ✅ Integrate external APIs
+- ✅ Debug common errors
+- ✅ Follow professional development workflows
 
 ---
 
-**Made with ❤️ for Flask learners**
+## 🚀 Quick Commands Reference
+
+```bash
+# SETUP
+./setup.sh          # Linux/Mac automated setup
+.\setup.ps1         # Windows automated setup
+
+# VALIDATION
+./workshop_check.sh 1   # Linux/Mac checkpoint 1
+.\workshop_check.ps1 1  # Windows checkpoint 1
+
+# RUN FLASK APP
+cd student_workspace
+python app.py
+
+# RUN AI ASSISTANT (Optional)
+python workshop_assistant.py
+```
+
+---
+
+**🎉 Ready to start? Choose your setup method above and let's build something awesome!**
+
+Built with ❤️ for Flask learners everywhere.
