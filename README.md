@@ -34,16 +34,14 @@ chmod +x setup.sh
 
 ### 👉 **[READ THE WORKSHOP GUIDE](WORKSHOP_GUIDE.md)** 👈
 
-The comprehensive guide covers:
+**Everything you need to know is here:**
 
 - ✅ **What is Flask?** - From a developer's perspective
-- ✅ **Why Virtual Environments?** - Real scenarios and benefits
+- ✅ **Why Virtual Environments?** - Real scenarios and benefits  
 - ✅ **Flask Routes** - URLs, dynamic routes, HTTP methods
 - ✅ **Project Structure** - templates/, static/ folders explained
-- ✅ **Git Basics** - Commits, branches, workflow
-- ✅ **Common Issues** - Solutions to every problem you'll hit
-
-**Start here:** [WORKSHOP_GUIDE.md](WORKSHOP_GUIDE.md)
+- ✅ **Git Basics** - Setup, commits, branches, workflow
+- ✅ **Common Issues** - Solutions to every problem
 
 ---
 
@@ -56,15 +54,12 @@ The comprehensive guide covers:
 .\venv\Scripts\Activate.ps1
 ```
 
-You should see `(venv)` in your prompt:
-```
-(venv) PS C:\Flask-Workshop-Assistant>
-```
-
 **Linux/Mac:**
 ```bash
 source venv/bin/activate
 ```
+
+You should see `(venv)` in your prompt.
 
 ### Step 2: Run Flask
 
@@ -82,14 +77,16 @@ python app.py
 
 ```
 Flask-Workshop-Assistant/
-├── setup.ps1                 # Automated setup (Windows)
-├── setup.sh                  # Automated setup (Linux/Mac)
-├── WORKSHOP_GUIDE.md         # 📖 Complete learning guide
-├── venv/                     # Virtual environment (created by setup)
-├── app.py                    # Your Flask application (created by setup)
-├── templates/                # HTML files (created by setup)
+├── setup.ps1                 # Windows setup script
+├── setup.sh                  # Linux/Mac setup script
+├── README.md                 # This file
+├── WORKSHOP_GUIDE.md         # 📖 Complete guide
+├── requirements.txt          # Python dependencies
+├── venv/                     # Virtual environment
+├── app.py                    # Your Flask app
+├── templates/                # HTML files
 │   └── index.html
-└── static/                   # CSS, JS, images (created by setup)
+└── static/                   # CSS, JS, images
 ```
 
 ---
@@ -108,7 +105,7 @@ source venv/bin/activate
 deactivate
 ```
 
-### Flask Commands
+### Flask
 ```powershell
 # Run app
 python app.py
@@ -117,9 +114,9 @@ python app.py
 http://localhost:5000
 ```
 
-### Git Commands
+### Git
 ```powershell
-# Setup (first time only)
+# First-time setup
 git config --global user.email "your.email@example.com"
 git config --global user.name "Your Name"
 
@@ -128,18 +125,17 @@ git add .
 git commit -m "Your message"
 git push
 
-# Create branch
-git checkout -b feature-name
-
-# Switch branch
-git checkout main
+# Branches
+git checkout -b feature-name    # Create new branch
+git checkout main               # Switch to main
+git merge feature-name          # Merge branch
 ```
 
 ---
 
 ## 🐛 Common Issues
 
-### Windows Execution Policy Error
+### Windows Execution Policy
 ```powershell
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
@@ -156,57 +152,27 @@ git config --global user.name "Your Name"
 3. Restart (`python app.py`)
 4. Refresh browser (`F5`)
 
-### Module Not Found: flask
+### Module Not Found
 ```powershell
-# You forgot to activate venv!
+# Activate venv first!
 .\venv\Scripts\Activate.ps1
 python app.py
 ```
 
-**More solutions:** [WORKSHOP_GUIDE.md - Common Issues](WORKSHOP_GUIDE.md#common-issues--solutions)
+**More solutions:** [WORKSHOP_GUIDE.md](WORKSHOP_GUIDE.md#common-issues--solutions)
 
 ---
 
-## 📚 Learning Resources
+## 🎓 What You'll Learn
 
-### Main Documentation
-- **[Workshop Guide](WORKSHOP_GUIDE.md)** - Complete learning path
-- **[Windows Setup](WINDOWS_SETUP.md)** - Detailed Windows instructions
-- **[Quick Start](QUICKSTART.md)** - Fast track guide
-
-### What You'll Learn
-
-By completing this workshop:
-- ✅ Understand Python virtual environments
-- ✅ Build Flask web applications
-- ✅ Use routes and templates
-- ✅ Work with static files (CSS, JS, images)
-- ✅ Use Git for version control
-- ✅ Work with branches
-- ✅ Debug common errors
-- ✅ Follow professional workflows
-
----
-
-## 🎨 What's Included
-
-### Automated Setup
-- One command creates everything
-- Virtual environment with Flask
-- Project folders and starter code
-- Beautiful starter template with Tailwind CSS
-
-### Beginner-Friendly
-- No prior Flask knowledge needed
-- Clear error messages
-- Step-by-step instructions
-- Real developer workflows
-
-### Production-Ready Practices
-- Virtual environments
-- Git version control
-- Proper project structure
-- Industry standards
+- ✅ Python virtual environments
+- ✅ Flask web applications
+- ✅ Routes and templates
+- ✅ Static files (CSS, JS, images)
+- ✅ Git version control
+- ✅ Working with branches
+- ✅ Debugging common errors
+- ✅ Professional workflows
 
 ---
 
@@ -219,16 +185,6 @@ By completing this workshop:
 
 ---
 
-## 🤝 Contributing
-
-Contributions welcome! Please:
-1. Fork the repository
-2. Create a feature branch
-3. Test your changes
-4. Submit a pull request
-
----
-
 ## 📜 License
 
 MIT License - free for educational use!
@@ -237,21 +193,19 @@ MIT License - free for educational use!
 
 ## 📞 Support
 
+- **Documentation:** [WORKSHOP_GUIDE.md](WORKSHOP_GUIDE.md)
 - **Issues:** [Report bugs](https://github.com/DANI-cloud-del/Flask-Workshop-Assistant/issues)
-- **Questions:** [GitHub Discussions](https://github.com/DANI-cloud-del/Flask-Workshop-Assistant/discussions)
-- **Documentation:** [Workshop Guide](WORKSHOP_GUIDE.md)
+- **Discussions:** [Ask questions](https://github.com/DANI-cloud-del/Flask-Workshop-Assistant/discussions)
 
 ---
 
 ## 🚀 Ready to Start?
 
-1. **Clone the repo**
-2. **Run setup script** (`setup.ps1` or `setup.sh`)
-3. **Read the [Workshop Guide](WORKSHOP_GUIDE.md)**
-4. **Build something awesome!**
+1. Clone the repo
+2. Run `setup.ps1` (Windows) or `setup.sh` (Linux/Mac)
+3. Read [WORKSHOP_GUIDE.md](WORKSHOP_GUIDE.md)
+4. Build something awesome!
 
 ---
 
-**🎉 Let's learn Flask together!**
-
-Built with ❤️ for Flask learners everywhere.
+**Built with ❤️ for Flask learners**
