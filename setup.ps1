@@ -4,7 +4,7 @@
 # Usage: .\setup.ps1
 # ============================================================================
 
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Continue"
 
 Write-Host "===================================================" -ForegroundColor Blue
 Write-Host "  Flask Workshop - Quick Setup" -ForegroundColor Blue
@@ -15,10 +15,10 @@ Write-Host ""
 Write-Host "[1/5] Checking Python..." -ForegroundColor Cyan
 try {
     $pythonVersion = python --version 2>&1
-    Write-Host "✓ Python found: $pythonVersion" -ForegroundColor Green
+    Write-Host "[OK] Python found: $pythonVersion" -ForegroundColor Green
 }
 catch {
-    Write-Host "ERROR: Python not found. Please install Python 3.8+" -ForegroundColor Red
+    Write-Host "[ERROR] Python not found. Please install Python 3.8+" -ForegroundColor Red
     exit 1
 }
 Write-Host ""
@@ -30,22 +30,32 @@ if (Test-Path "venv") {
 }
 else {
     python -m venv venv
-    Write-Host "✓ Virtual environment created" -ForegroundColor Green
+    Write-Host "[OK] Virtual environment created" -ForegroundColor Green
 }
 Write-Host ""
 
-# Step 3: Activate and install Flask
+# Step 3: Install Flask
 Write-Host "[3/5] Installing Flask..." -ForegroundColor Cyan
-& ".\venv\Scripts\Activate.ps1"
-pip install --quiet Flask
-Write-Host "✓ Flask installed" -ForegroundColor Green
+if (Test-Path "venv\Scripts\Activate.ps1") {
+    & ".\venv\Scripts\Activate.ps1"
+    pip install --quiet Flask
+    Write-Host "[OK] Flask installed" -ForegroundColor Green
+}
+else {
+    Write-Host "[ERROR] Virtual environment activation failed" -ForegroundColor Red
+    exit 1
+}
 Write-Host ""
 
 # Step 4: Create project structure
 Write-Host "[4/5] Creating project folders..." -ForegroundColor Cyan
-if (-not (Test-Path "templates")) { New-Item -ItemType Directory -Path "templates" | Out-Null }
-if (-not (Test-Path "static")) { New-Item -ItemType Directory -Path "static" | Out-Null }
-Write-Host "✓ Folders created (templates/, static/)" -ForegroundColor Green
+if (-not (Test-Path "templates")) { 
+    New-Item -ItemType Directory -Path "templates" | Out-Null 
+}
+if (-not (Test-Path "static")) { 
+    New-Item -ItemType Directory -Path "static" | Out-Null 
+}
+Write-Host "[OK] Folders created (templates/, static/)" -ForegroundColor Green
 Write-Host ""
 
 # Step 5: Create starter files
@@ -53,7 +63,7 @@ Write-Host "[5/5] Creating starter files..." -ForegroundColor Cyan
 
 # Create app.py
 if (-not (Test-Path "app.py")) {
-$appContent = @'
+    $appContent = @'
 from flask import Flask, render_template
 
 app = Flask(__name__)
@@ -65,16 +75,16 @@ def home():
 if __name__ == '__main__':
     app.run(debug=True)
 '@
-Set-Content -Path "app.py" -Value $appContent
-Write-Host "✓ Created app.py" -ForegroundColor Green
+    Set-Content -Path "app.py" -Value $appContent -Encoding UTF8
+    Write-Host "[OK] Created app.py" -ForegroundColor Green
 }
 else {
-Write-Host "app.py already exists"
+    Write-Host "app.py already exists"
 }
 
 # Create index.html
 if (-not (Test-Path "templates\index.html")) {
-$htmlContent = @'
+    $htmlContent = @'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -96,15 +106,15 @@ $htmlContent = @'
             
             <div class="space-y-4">
                 <div class="flex items-center space-x-2">
-                    <span class="text-2xl">✓</span>
+                    <span class="text-2xl">OK</span>
                     <span class="text-gray-700">Flask installed</span>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <span class="text-2xl">✓</span>
+                    <span class="text-2xl">OK</span>
                     <span class="text-gray-700">Project structure created</span>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <span class="text-2xl">✓</span>
+                    <span class="text-2xl">OK</span>
                     <span class="text-gray-700">Tailwind CSS configured</span>
                 </div>
             </div>
@@ -123,11 +133,11 @@ $htmlContent = @'
 </body>
 </html>
 '@
-Set-Content -Path "templates\index.html" -Value $htmlContent
-Write-Host "✓ Created templates/index.html" -ForegroundColor Green
+    Set-Content -Path "templates\index.html" -Value $htmlContent -Encoding UTF8
+    Write-Host "[OK] Created templates/index.html" -ForegroundColor Green
 }
 else {
-Write-Host "templates/index.html already exists"
+    Write-Host "templates/index.html already exists"
 }
 
 Write-Host ""
@@ -148,3 +158,4 @@ Write-Host "  3. Open browser:" -ForegroundColor Yellow
 Write-Host "     http://localhost:5000"
 Write-Host ""
 Write-Host "===================================================" -ForegroundColor Green
+Write-Host ""
