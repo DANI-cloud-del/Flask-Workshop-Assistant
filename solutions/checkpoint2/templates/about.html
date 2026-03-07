@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}About - Flask Workshop{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <h1 class="text-4xl font-bold text-gray-800 mb-6">About This Workshop</h1>
+    
+    <div class="bg-white rounded-lg shadow-md p-8 mb-6">
+        <h2 class="text-2xl font-semibold mb-4">What You're Learning</h2>
+        <ul class="space-y-3 text-gray-700">
+            <li class="flex items-start">
+                <span class="text-2xl mr-3">✅</span>
+                <span><strong>Flask Basics:</strong> Routes, templates, and web development with Python</span>
+            </li>
+            <li class="flex items-start">
+                <span class="text-2xl mr-3">✅</span>
+                <span><strong>Tailwind CSS:</strong> Modern utility-first CSS framework</span>
+            </li>
+            <li class="flex items-start">
+                <span class="text-2xl mr-3">✅</span>
+                <span><strong>Template Inheritance:</strong> Using base.html to avoid code duplication</span>
+            </li>
+            <li class="flex items-start">
+                <span class="text-2xl mr-3">✅</span>
+                <span><strong>AI Integration:</strong> Adding an intelligent assistant to your app</span>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-8 border border-blue-200">
+        <h2 class="text-2xl font-semibold mb-4 text-indigo-900">💡 Pro Tip</h2>
+        <p class="text-gray-700 mb-4">
+            The AI assistant in the bottom-right corner can help you with:
+        </p>
+        <ul class="list-disc list-inside text-gray-700 space-y-2">
+            <li>Explaining Flask concepts</li>
+            <li>Debugging errors</li>
+            <li>Understanding your code</li>
+            <li>Suggesting improvements</li>
+        </ul>
+        <p class="text-gray-700 mt-4">
+            Try clicking it and asking: "How do template blocks work?"
+        </p>
+    </div>
+</div>
+{% endblock %}

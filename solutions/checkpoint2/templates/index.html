@@ -1,13 +1,52 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flask Workshop</title>
-</head>
-<body>
-    <h1>Welcome to Flask!</h1>
-    <p>This is your first Flask application.</p>
-    <a href="/about">About Page</a>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Home - Flask Workshop{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Hero Section -->
+    <div class="text-center mb-12">
+        <h1 class="text-5xl font-bold text-gray-800 mb-4">
+            Welcome to Flask! 🚀
+        </h1>
+        <p class="text-xl text-gray-600">
+            Your first web application with Python
+        </p>
+    </div>
+    
+    <!-- Feature Cards -->
+    <div class="grid md:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition">
+            <div class="text-4xl mb-3">🐍</div>
+            <h3 class="text-xl font-semibold mb-2">Python Powered</h3>
+            <p class="text-gray-600">Built with Flask, a lightweight Python web framework</p>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition">
+            <div class="text-4xl mb-3">🎨</div>
+            <h3 class="text-xl font-semibold mb-2">Beautiful Design</h3>
+            <p class="text-gray-600">Styled with Tailwind CSS utility classes</p>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition">
+            <div class="text-4xl mb-3">🤖</div>
+            <h3 class="text-xl font-semibold mb-2">AI Assistant</h3>
+            <p class="text-gray-600">Get help anytime with the floating AI widget</p>
+        </div>
+    </div>
+    
+    <!-- Call to Action -->
+    <div class="mt-12 text-center">
+        <div class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-8 rounded-lg shadow-lg">
+            <h2 class="text-3xl font-bold mb-4">🎉 You Did It!</h2>
+            <p class="text-lg mb-6">
+                You've successfully created a Flask web application with Tailwind CSS styling
+                and an AI assistant. Keep building!
+            </p>
+            <button class="bg-white text-indigo-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
+                Explore More
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
