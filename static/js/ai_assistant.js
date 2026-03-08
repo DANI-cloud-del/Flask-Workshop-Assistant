@@ -139,6 +139,33 @@ function addMessageToChat(content, type) {
     
     chatHistory.appendChild(messageDiv);
     scrollChatToBottom();
+    
+    // Auto-speak AI responses if enabled
+    if (type === 'ai') {
+        speakAIResponse(content);
+    }
+}
+
+// Speak AI response if TTS is enabled
+function speakAIResponse(text) {
+    try {
+        // Check if TTS handler exists and is enabled
+        if (window.ttsHandler && window.ttsHandler.isEnabled() && window.ttsHandler.isAutoplayEnabled()) {
+            console.log('Auto-playing TTS for AI response');
+            // Clean text (remove markdown, HTML)
+            const cleanText = text
+                .replace(/\*\*(.*?)\*\*/g, '$1')  // Remove bold
+                .replace(/\*(.*?)\*/g, '$1')      // Remove italic
+                .replace(/`(.*?)`/g, '$1')        // Remove code
+                .replace(/<[^>]*>/g, '')          // Remove HTML tags
+                .replace(/\n/g, ' ')              // Replace newlines with spaces
+                .trim();
+            
+            window.speakText(cleanText);
+        }
+    } catch (error) {
+        console.error('TTS error:', error);
+    }
 }
 
 // Scroll chat to bottom
@@ -170,6 +197,11 @@ function closeSearchBar() {
     // Stop listening if active
     if (isListening) {
         stopListening();
+    }
+    
+    // Stop TTS if speaking
+    if (window.stopSpeaking) {
+        window.stopSpeaking();
     }
 }
 
@@ -280,7 +312,7 @@ async function sendMessage() {
             // Hide typing indicator
             hideTypingIndicator();
             
-            // Add AI response to chat
+            // Add AI response to chat (TTS will auto-play if enabled)
             addMessageToChat(data.response, 'ai');
             
             console.log('✓ AI Response received');
