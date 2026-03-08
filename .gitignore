@@ -53,3 +53,6 @@ htmlcov/
 student_workspace/venv/
 student_workspace/.env
 student_workspace/__pycache__/
+
+
+oauth_config.json
