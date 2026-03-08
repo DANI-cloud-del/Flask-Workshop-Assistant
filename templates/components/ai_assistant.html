@@ -1,8 +1,8 @@
-<!-- AI Assistant - Search Bar Style -->
+<!-- AI Assistant - Clean Search Bar -->
 <div id="aiContainer" class="ai-container">
     
-    <!-- Collapsed Pill Button -->
-    <div class="ai-pill">
+    <!-- Pill Button -->
+    <div id="aiPill" class="ai-pill" onclick="toggleAI()">
         
         <!-- Gold Floating Balls -->
         <div class="ai-balls">
@@ -16,10 +16,10 @@
         <div class="ai-face">
             <div class="ai-eyes">
                 <div class="ai-eye">
-                    <div id="pillLeftPupil" class="ai-pupil"></div>
+                    <div id="leftPupil" class="ai-pupil"></div>
                 </div>
                 <div class="ai-eye">
-                    <div id="pillRightPupil" class="ai-pupil"></div>
+                    <div id="rightPupil" class="ai-pupil"></div>
                 </div>
             </div>
         </div>
@@ -27,32 +27,15 @@
         <!-- Status Text -->
         <span class="ai-status">Ask me anything</span>
         
-        <!-- Search Icon Button -->
-        <div class="ai-search-btn" onclick="expandSearchBar()">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-            </svg>
-        </div>
-        
     </div>
     
-    <!-- Expanded Search Bar -->
+    <!-- Clean Search Bar (No AI Face) -->
     <div class="ai-search-bar">
         
-        <!-- AI Watcher (Left) -->
-        <div class="ai-watcher">
-            <div class="ai-watcher-eyes">
-                <div class="ai-watcher-eye">
-                    <div id="watcherLeftPupil" class="ai-watcher-pupil"></div>
-                </div>
-                <div class="ai-watcher-eye">
-                    <div id="watcherRightPupil" class="ai-watcher-pupil"></div>
-                </div>
-            </div>
+        <!-- Mic Status Indicator -->
+        <div id="aiMicStatus" class="ai-mic-status">
+            <span>Listening...</span>
         </div>
-        
-        <!-- Divider -->
-        <div class="ai-divider"></div>
         
         <!-- Input Field -->
         <input 
@@ -60,23 +43,30 @@
             id="aiSearchInput" 
             class="ai-input" 
             placeholder="Ask me anything..."
-            onkeypress="if(event.key==='Enter') sendSearchMessage()"
+            onkeypress="handleEnterKey(event)"
         >
         
         <!-- Action Buttons -->
         <div class="ai-actions">
             
             <!-- Attach Button -->
-            <button class="ai-attach-btn" onclick="openFileUpload()">
-                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            <button class="ai-action-btn" onclick="openFileUpload()" title="Attach files">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                </svg>
+            </button>
+            
+            <!-- Mic Button -->
+            <button id="aiMicBtn" class="ai-action-btn" onclick="toggleMic()" title="Voice input">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
                 </svg>
             </button>
             
             <!-- Send Button -->
-            <button class="ai-send-btn" onclick="sendSearchMessage()">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+            <button id="aiSendBtn" class="ai-send-btn" onclick="sendMessage()" title="Send" disabled>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
                 </svg>
             </button>
             
@@ -85,6 +75,6 @@
     </div>
     
     <!-- Hidden File Input -->
-    <input type="file" id="aiFileInput" style="display: none;" accept="image/*,application/pdf" multiple>
+    <input type="file" id="aiFileInput" style="display: none;" accept="image/*,application/pdf,.doc,.docx,.txt" multiple>
     
 </div>

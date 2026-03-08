@@ -1,86 +1,179 @@
 /* ==========================================
-   AI ASSISTANT - SEARCH BAR STYLE
+   AI ASSISTANT - CLEAN SEARCH BAR
    ========================================== */
 
-let isExpanded = false;
+let isSearchOpen = false;
+let isListening = false;
 
-// Mouse following eyes
+// Mouse following eyes (pill only)
 document.addEventListener('mousemove', (e) => {
-    // Pill eyes
-    const pillLeft = document.getElementById('pillLeftPupil');
-    const pillRight = document.getElementById('pillRightPupil');
-    if (pillLeft && pillRight) {
-        const face = pillLeft.closest('.ai-face');
-        if (face) updateEyes(face, pillLeft, pillRight, e);
-    }
+    const leftPupil = document.getElementById('leftPupil');
+    const rightPupil = document.getElementById('rightPupil');
     
-    // Watcher eyes
-    const watcherLeft = document.getElementById('watcherLeftPupil');
-    const watcherRight = document.getElementById('watcherRightPupil');
-    if (watcherLeft && watcherRight) {
-        const watcher = watcherLeft.closest('.ai-watcher');
-        if (watcher) updateEyes(watcher, watcherLeft, watcherRight, e);
-    }
-});
-
-function updateEyes(faceElement, leftPupil, rightPupil, mouseEvent) {
-    const rect = faceElement.getBoundingClientRect();
+    if (!leftPupil || !rightPupil) return;
+    
+    const face = leftPupil.closest('.ai-face');
+    if (!face) return;
+    
+    const rect = face.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
     
-    const angle = Math.atan2(mouseEvent.clientY - centerY, mouseEvent.clientX - centerX);
-    const distance = Math.min(2, Math.hypot(mouseEvent.clientX - centerX, mouseEvent.clientY - centerY) / 100);
+    const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
+    const distance = Math.min(2, Math.hypot(e.clientX - centerX, e.clientY - centerY) / 100);
     
     const pupilX = Math.cos(angle) * distance;
     const pupilY = Math.sin(angle) * distance;
     
     leftPupil.style.transform = `translate(calc(-50% + ${pupilX}px), calc(-50% + ${pupilY}px))`;
     rightPupil.style.transform = `translate(calc(-50% + ${pupilX}px), calc(-50% + ${pupilY}px))`;
-}
+});
 
-// Expand search bar
-function expandSearchBar() {
+// Toggle AI (called from keyboard button or pill click)
+function toggleAI() {
     const container = document.getElementById('aiContainer');
-    container.classList.add('expanded');
-    isExpanded = true;
+    const pill = document.getElementById('aiPill');
     
-    // Focus input after animation
-    setTimeout(() => {
-        const input = document.getElementById('aiSearchInput');
-        if (input) input.focus();
-    }, 300);
+    isSearchOpen = !isSearchOpen;
+    
+    if (isSearchOpen) {
+        // Open search bar
+        container.classList.add('search-open');
+        pill.classList.add('active');
+        
+        // Focus input after animation
+        setTimeout(() => {
+            const input = document.getElementById('aiSearchInput');
+            if (input) input.focus();
+        }, 300);
+    } else {
+        // Close search bar
+        closeSearchBar();
+    }
 }
 
-// Collapse search bar
-function collapseSearchBar() {
+// Close search bar
+function closeSearchBar() {
     const container = document.getElementById('aiContainer');
+    const pill = document.getElementById('aiPill');
     const input = document.getElementById('aiSearchInput');
     
-    container.classList.remove('expanded');
-    isExpanded = false;
+    container.classList.remove('search-open');
+    pill.classList.remove('active');
+    isSearchOpen = false;
     
     // Clear input
-    if (input) input.value = '';
-}
-
-// Send message
-function sendSearchMessage() {
-    const input = document.getElementById('aiSearchInput');
-    const message = input.value.trim();
-    
-    if (!message) {
-        return; // Don't send empty messages
+    if (input) {
+        input.value = '';
+        updateSendButton();
     }
     
-    // Here you would send to your backend API
+    // Stop listening if active
+    if (isListening) {
+        stopListening();
+    }
+}
+
+// Handle Enter key
+function handleEnterKey(event) {
+    if (event.key === 'Enter') {
+        sendMessage();
+    }
+}
+
+// Update send button state
+function updateSendButton() {
+    const input = document.getElementById('aiSearchInput');
+    const sendBtn = document.getElementById('aiSendBtn');
+    
+    if (!input || !sendBtn) return;
+    
+    if (input.value.trim()) {
+        sendBtn.disabled = false;
+        sendBtn.classList.add('active');
+    } else {
+        sendBtn.disabled = true;
+        sendBtn.classList.remove('active');
+    }
+}
+
+// Listen for input changes
+document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('aiSearchInput');
+    if (input) {
+        input.addEventListener('input', updateSendButton);
+    }
+});
+
+// Send Message
+function sendMessage() {
+    const input = document.getElementById('aiSearchInput');
+    if (!input) return;
+    
+    const message = input.value.trim();
+    
+    if (!message) return;
+    
     console.log('Sending message:', message);
     
-    // Show processing (you can expand this with chat interface)
-    alert(`Message sent: "${message}"\n\nThis will be processed by your AI!`);
+    // TODO: Send to your backend API
+    // Example: fetch('/api/chat', { method: 'POST', body: JSON.stringify({ message }) })
     
-    // Clear and collapse
+    alert(`Message sent: "${message}"\n\nThis will be processed by your AI backend!`);
+    
+    // Clear and close
     input.value = '';
-    collapseSearchBar();
+    updateSendButton();
+    closeSearchBar();
+}
+
+// Toggle Microphone
+function toggleMic() {
+    if (isListening) {
+        stopListening();
+    } else {
+        startListening();
+    }
+}
+
+// Start Listening
+function startListening() {
+    isListening = true;
+    const micBtn = document.getElementById('aiMicBtn');
+    const micStatus = document.getElementById('aiMicStatus');
+    
+    micBtn.classList.add('listening');
+    micStatus.classList.add('show');
+    
+    console.log('Started listening...');
+    
+    // TODO: Implement Web Speech API
+    // const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    // recognition.start();
+    
+    // Simulate speech recognition for now
+    setTimeout(() => {
+        stopListening();
+        
+        // Simulate recognized text
+        const input = document.getElementById('aiSearchInput');
+        if (input) {
+            input.value = "What is the weather today?";
+            updateSendButton();
+        }
+    }, 3000);
+}
+
+// Stop Listening
+function stopListening() {
+    isListening = false;
+    const micBtn = document.getElementById('aiMicBtn');
+    const micStatus = document.getElementById('aiMicStatus');
+    
+    micBtn.classList.remove('listening');
+    micStatus.classList.remove('show');
+    
+    console.log('Stopped listening.');
 }
 
 // Open file upload
@@ -97,27 +190,28 @@ document.addEventListener('DOMContentLoaded', () => {
             const files = e.target.files;
             if (files.length > 0) {
                 console.log('Files selected:', files);
-                alert(`${files.length} file(s) selected!\n\nYou can now send them with your message.`);
+                
+                const fileNames = Array.from(files).map(f => f.name).join(', ');
+                alert(`${files.length} file(s) selected:\n${fileNames}`);
             }
         });
     }
-    
-    // Set username
-    const username = document.body.dataset.username || 'User';
-    // You can use this for welcome messages if needed
 });
 
-// Click outside to collapse
+// Click outside to close
 document.addEventListener('click', (e) => {
     const container = document.getElementById('aiContainer');
-    if (isExpanded && !container.contains(e.target)) {
-        collapseSearchBar();
+    
+    if (!container) return;
+    
+    if (isSearchOpen && !container.contains(e.target)) {
+        closeSearchBar();
     }
 });
 
-// Escape key to collapse
+// Escape key to close
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && isExpanded) {
-        collapseSearchBar();
+    if (e.key === 'Escape' && isSearchOpen) {
+        closeSearchBar();
     }
 });
