@@ -3,9 +3,578 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>{% block title %}Flask Chat App{% endblock %}</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        /* Custom colors */
+        :root {
+            --primary: #00b4d8;
+            --secondary: #48cae4;
+            --hover: #caf0f8;
+            --ai-purple: #9d4edd;
+            --ai-purple-dark: #7b2cbf;
+        }
+        
+        /* Glow effect animation */
+        @keyframes neon-glow {
+            0%, 100% { 
+                box-shadow: 0 0 5px var(--primary), 
+                            0 0 10px var(--primary),
+                            0 0 15px var(--primary); 
+            }
+            50% { 
+                box-shadow: 0 0 10px var(--secondary), 
+                            0 0 20px var(--secondary),
+                            0 0 30px var(--secondary),
+                            0 0 40px var(--secondary); 
+            }
+        }
+        
+        .neon-glow:hover {
+            animation: neon-glow 1.5s infinite;
+        }
+        
+        /* Smooth underline effect */
+        .nav-link {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: width 0.4s ease;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* ==========================================
+           AI ASSISTANT - FUTURISTIC DESIGN
+           ========================================== */
+        
+        /* AI Container */
+        .ai-assistant {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        /* AI Circle - Black with Purple Glow */
+        .ai-circle {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            pointer-events: all;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 30px rgba(157, 78, 221, 0.4),
+                        0 0 60px rgba(123, 44, 191, 0.2),
+                        inset 0 0 20px rgba(157, 78, 221, 0.1);
+        }
+
+        .ai-circle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 40px rgba(157, 78, 221, 0.6),
+                        0 0 80px rgba(123, 44, 191, 0.3),
+                        inset 0 0 30px rgba(157, 78, 221, 0.2);
+        }
+
+        /* Purple Ring Animation */
+        .ai-ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: #9d4edd;
+            animation: rotate 2s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Eyes Container */
+        .ai-eyes {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Eye Design */
+        .ai-eye {
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Pupil */
+        .ai-pupil {
+            width: 10px;
+            height: 10px;
+            background: #9d4edd;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: eyeMove 4s ease-in-out infinite;
+            box-shadow: 0 0 10px rgba(157, 78, 221, 0.6);
+        }
+
+        /* Eye Movement Animation */
+        @keyframes eyeMove {
+            0%, 100% { 
+                transform: translate(-50%, -50%); 
+            }
+            25% { 
+                transform: translate(-30%, -30%); 
+            }
+            50% { 
+                transform: translate(-70%, -50%); 
+            }
+            75% { 
+                transform: translate(-50%, -70%); 
+            }
+        }
+
+        /* Blink Animation */
+        .ai-eye::after {
+            content: '';
+            position: absolute;
+            top: -100%;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #1a1a2e;
+            animation: blink 5s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 94%, 100% { 
+                top: -100%; 
+            }
+            95%, 97% { 
+                top: 0; 
+            }
+        }
+
+        /* Thinking Animation (when active) */
+        .ai-circle.thinking .ai-pupil {
+            animation: thinking 0.8s ease-in-out infinite;
+        }
+
+        @keyframes thinking {
+            0%, 100% { 
+                transform: translate(-50%, -50%) scale(1); 
+            }
+            50% { 
+                transform: translate(-50%, -50%) scale(1.3); 
+            }
+        }
+
+        /* Chat Panel */
+        .ai-chat-panel {
+            position: absolute;
+            bottom: 100px;
+            right: 0;
+            width: 350px;
+            max-height: 500px;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 10px 50px rgba(157, 78, 221, 0.3);
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .ai-chat-panel.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+
+        /* Chat Header */
+        .ai-chat-header {
+            background: linear-gradient(135deg, #9d4edd 0%, #7b2cbf 100%);
+            padding: 20px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .ai-chat-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        /* Chat Messages */
+        .ai-chat-messages {
+            padding: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .ai-message {
+            padding: 12px 16px;
+            border-radius: 16px;
+            max-width: 80%;
+            animation: messageSlide 0.3s ease;
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .ai-message.user {
+            background: linear-gradient(135deg, #00b4d8 0%, #48cae4 100%);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .ai-message.bot {
+            background: rgba(157, 78, 221, 0.1);
+            color: #2c3e50;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        /* Chat Input */
+        .ai-chat-input {
+            padding: 15px 20px;
+            border-top: 1px solid rgba(157, 78, 221, 0.1);
+            display: flex;
+            gap: 10px;
+        }
+
+        .ai-chat-input input {
+            flex: 1;
+            border: 2px solid rgba(157, 78, 221, 0.2);
+            border-radius: 12px;
+            padding: 10px 15px;
+            outline: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .ai-chat-input input:focus {
+            border-color: #9d4edd;
+            box-shadow: 0 0 0 3px rgba(157, 78, 221, 0.1);
+        }
+
+        .ai-send-btn {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #9d4edd 0%, #7b2cbf 100%);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .ai-send-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(157, 78, 221, 0.4);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .ai-assistant {
+                bottom: 20px;
+                right: 20px;
+            }
+
+            .ai-circle {
+                width: 70px;
+                height: 70px;
+            }
+
+            .ai-chat-panel {
+                width: calc(100vw - 40px);
+                right: -10px;
+            }
+        }
+        
+        {% block extra_css %}{% endblock %}
+    </style>
 </head>
-<body>
+<body class="bg-white text-gray-900 min-h-screen">
+    
+    <!-- Futuristic Navbar -->
+        <!-- AI Assistant Widget - Pill Shape -->
+    <div class="fixed bottom-8 left-1/2 -translate-x-1/2 z-[9999] pointer-events-none">
+        
+        <!-- Control Buttons (Hidden initially) -->
+        <div id="aiControls" class="absolute bottom-24 left-1/2 -translate-x-1/2 translate-y-5 opacity-0 pointer-events-none transition-all duration-300 ease-out">
+            <div class="flex items-center gap-4 px-6 py-4 bg-gray-900/95 backdrop-blur-xl rounded-full shadow-2xl">
+                
+                <!-- Keyboard Button -->
+                <button onclick="toggleTyping()" class="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-200 flex items-center justify-center group hover:-translate-y-1 pointer-events-auto">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <rect x="2" y="6" width="20" height="12" rx="2" stroke-width="2"/>
+                        <line x1="6" y1="10" x2="6.01" y2="10" stroke-width="2" stroke-linecap="round"/>
+                        <line x1="10" y1="10" x2="10.01" y2="10" stroke-width="2" stroke-linecap="round"/>
+                        <line x1="14" y1="10" x2="14.01" y2="10" stroke-width="2" stroke-linecap="round"/>
+                        <line x1="18" y1="10" x2="18.01" y2="10" stroke-width="2" stroke-linecap="round"/>
+                        <line x1="8" y1="14" x2="16" y2="14" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </button>
+
+                <!-- Microphone Button (Main) -->
+                <button onclick="toggleMic()" id="micButton" class="w-16 h-16 rounded-full bg-gradient-to-br from-[#00b4d8] to-[#48cae4] hover:from-[#0096b8] hover:to-[#38aac4] transition-all duration-200 flex items-center justify-center shadow-lg shadow-[#00b4d8]/50 hover:scale-110 pointer-events-auto">
+                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+                    </svg>
+                </button>
+
+                <!-- Close Button -->
+                <button onclick="closeAI()" class="w-12 h-12 rounded-full bg-white/10 hover:bg-red-500 transition-all duration-200 flex items-center justify-center hover:-translate-y-1 pointer-events-auto">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+                
+            </div>
+        </div>
+
+        <!-- Typing Input (Hidden initially) -->
+        <div id="typingInput" class="absolute bottom-44 left-1/2 -translate-x-1/2 translate-y-5 opacity-0 pointer-events-none transition-all duration-300 ease-out w-[350px] max-w-[calc(100vw-2rem)]">
+            <div class="flex items-center gap-3 px-4 py-3 bg-white/98 backdrop-blur-xl rounded-full shadow-xl shadow-[#00b4d8]/20">
+                <input 
+                    type="text" 
+                    id="aiTextInput"
+                    placeholder="Type your message..."
+                    class="flex-1 bg-[#00b4d8]/5 border-none outline-none px-4 py-2 rounded-full text-sm text-gray-800 placeholder-[#00b4d8]/50 focus:bg-[#00b4d8]/10 transition-all pointer-events-auto"
+                    onkeypress="if(event.key==='Enter') sendMessage()"
+                >
+                <button onclick="sendMessage()" class="w-10 h-10 rounded-full bg-gradient-to-br from-[#00b4d8] to-[#48cae4] flex items-center justify-center hover:scale-110 transition-all duration-200 shadow-md shadow-[#00b4d8]/30 pointer-events-auto flex-shrink-0">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- AI Pill Button -->
+        <button onclick="toggleAI()" id="aiPill" class="px-6 py-3 bg-white/95 backdrop-blur-xl rounded-full shadow-lg shadow-[#00b4d8]/20 hover:shadow-xl hover:shadow-[#00b4d8]/30 hover:-translate-y-1 transition-all duration-300 pointer-events-auto">
+            <div class="flex items-center gap-3">
+                <!-- AI Eyes in Gradient Circle -->
+                <div class="relative w-10 h-10 rounded-full bg-gradient-to-br from-[#00b4d8] to-[#48cae4] flex items-center justify-center shadow-md shadow-[#00b4d8]/40">
+                    <div class="flex gap-2">
+                        <!-- Left Eye -->
+                        <div class="w-2 h-2 bg-white rounded-full relative overflow-hidden">
+                            <div class="absolute w-1 h-1 bg-[#00b4d8] rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-[eyeBounce_3s_ease-in-out_infinite]"></div>
+                        </div>
+                        <!-- Right Eye -->
+                        <div class="w-2 h-2 bg-white rounded-full relative overflow-hidden">
+                            <div class="absolute w-1 h-1 bg-[#00b4d8] rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-[eyeBounce_3s_ease-in-out_infinite_0.15s]"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Status Text -->
+                <span id="aiStatus" class="text-sm font-medium text-gray-800">Ask me anything</span>
+            </div>
+        </button>
+
+    </div>
+
+    <style>
+        /* Eye Bounce Animation */
+        @keyframes eyeBounce {
+            0%, 100% { 
+                transform: translate(-50%, -50%); 
+            }
+            25% { 
+                transform: translate(-70%, -30%); 
+            }
+            50% { 
+                transform: translate(-30%, -70%); 
+            }
+            75% { 
+                transform: translate(-70%, -70%); 
+            }
+        }
+
+        /* Listening Animation */
+        @keyframes pulse {
+            0%, 100% { 
+                transform: scale(1); 
+                opacity: 1; 
+            }
+            50% { 
+                transform: scale(1.2); 
+                opacity: 0.8; 
+            }
+        }
+
+        .listening {
+            animation: pulse 1s ease-in-out infinite;
+        }
+    </style>
+
+    <script>
+        let isOpen = false;
+        let isListening = false;
+        let isTypingMode = false;
+
+        function toggleAI() {
+            isOpen = !isOpen;
+            const controls = document.getElementById('aiControls');
+            const pill = document.getElementById('aiPill');
+            
+            if (isOpen) {
+                controls.classList.remove('opacity-0', 'translate-y-5', 'pointer-events-none');
+                controls.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                pill.classList.add('bg-gradient-to-br', 'from-[#00b4d8]', 'to-[#48cae4]');
+                pill.querySelector('span').classList.add('text-white');
+            } else {
+                controls.classList.add('opacity-0', 'translate-y-5', 'pointer-events-none');
+                controls.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                pill.classList.remove('bg-gradient-to-br', 'from-[#00b4d8]', 'to-[#48cae4]');
+                pill.querySelector('span').classList.remove('text-white');
+                closeTyping();
+            }
+        }
+
+        function toggleMic() {
+            isListening = !isListening;
+            const status = document.getElementById('aiStatus');
+            const micBtn = document.getElementById('micButton');
+            const eyes = document.querySelectorAll('#aiPill .w-2.h-2 > div');
+            
+            if (isListening) {
+                status.textContent = 'Listening...';
+                micBtn.classList.add('listening');
+                eyes.forEach(eye => eye.classList.add('listening'));
+                
+                // Simulate listening (replace with actual speech recognition)
+                setTimeout(() => {
+                    status.textContent = 'Processing...';
+                    setTimeout(() => {
+                        isListening = false;
+                        micBtn.classList.remove('listening');
+                        eyes.forEach(eye => eye.classList.remove('listening'));
+                        status.textContent = 'Ask me anything';
+                    }, 1500);
+                }, 3000);
+            } else {
+                status.textContent = 'Ask me anything';
+                micBtn.classList.remove('listening');
+                eyes.forEach(eye => eye.classList.remove('listening'));
+            }
+        }
+
+        function toggleTyping() {
+            isTypingMode = !isTypingMode;
+            const typingInput = document.getElementById('typingInput');
+            const aiTextInput = document.getElementById('aiTextInput');
+            
+            if (isTypingMode) {
+                typingInput.classList.remove('opacity-0', 'translate-y-5', 'pointer-events-none');
+                typingInput.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                setTimeout(() => aiTextInput.focus(), 300);
+            } else {
+                closeTyping();
+            }
+        }
+
+        function closeTyping() {
+            const typingInput = document.getElementById('typingInput');
+            typingInput.classList.add('opacity-0', 'translate-y-5', 'pointer-events-none');
+            typingInput.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+            isTypingMode = false;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('aiTextInput');
+            const message = input.value.trim();
+            const status = document.getElementById('aiStatus');
+            
+            if (!message) return;
+            
+            status.textContent = 'Processing...';
+            input.value = '';
+            
+            // Simulate AI processing (replace with actual API call)
+            setTimeout(() => {
+                status.textContent = 'Got it! ' + message.substring(0, 20) + '...';
+                setTimeout(() => {
+                    status.textContent = 'Ask me anything';
+                }, 2000);
+            }, 1500);
+            
+            closeTyping();
+        }
+
+        function closeAI() {
+            isOpen = false;
+            const controls = document.getElementById('aiControls');
+            const pill = document.getElementById('aiPill');
+            
+            controls.classList.add('opacity-0', 'translate-y-5', 'pointer-events-none');
+            controls.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+            pill.classList.remove('bg-gradient-to-br', 'from-[#00b4d8]', 'to-[#48cae4]');
+            pill.querySelector('span').classList.remove('text-white');
+            closeTyping();
+        }
+
+        // Close when clicking outside
+        document.addEventListener('click', function(e) {
+            const pill = document.getElementById('aiPill');
+            const controls = document.getElementById('aiControls');
+            const typing = document.getElementById('typingInput');
+            
+            if (!pill.contains(e.target) && !controls.contains(e.target) && !typing.contains(e.target)) {
+                if (isOpen) {
+                    closeAI();
+                }
+            }
+        });
+    </script>
+
     
 </body>
 </html>

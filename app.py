@@ -135,6 +135,17 @@ def get_user_info(access_token):
         print(f"Response: {response.text}")
         return None
 
+@app.route('/login', methods=['GET','POST'])
+def login():
+    if request.method == 'POST':
+
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+    if username == 'admin' and password == 'password':
+        return "Login successful!"
+    else:
+        return "Invalid credentials. Please try again."
 
 @app.route('/logout')
 def logout():
@@ -143,6 +154,18 @@ def logout():
     print("✓ Session cleared")
     return redirect(url_for('home'))
 
+@app.route('/chat')
+def chat():
+    if "user" not in session:
+        print("Unauthorized access to /chat")
+        return redirect(url_for('home'))
+    
+    user = session['user']
+    return render_template('chat.html', user=user)
+
+@app.route('/test')
+def test():
+    return render_template('test.html', user=session.get('user'))
 
 if __name__ == '__main__':
     print("\n" + "="*50)
