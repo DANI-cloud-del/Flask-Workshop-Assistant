@@ -4,6 +4,7 @@ import google_auth_oauthlib.flow
 import os
 import requests
 from dotenv import load_dotenv
+from datetime import timedelta
 
 # Load environment variables
 load_dotenv()
@@ -13,6 +14,19 @@ os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY') or os.urandom(24)
+
+# ==========================================
+# SESSION CONFIGURATION (Fixes OAuth state mismatch)
+# ==========================================
+app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1)
+
+# Make session permanent to survive Flask restarts
+@app.before_request
+def make_session_permanent():
+    session.permanent = True
 
 # Initialize Groq client
 groq_client = Groq(api_key=os.getenv('GROQ_API_KEY'))
@@ -90,6 +104,8 @@ def api_chat():
         user_message = data['message']
         conversation_history = data.get('conversation_history', [])
         
+        print(f"\n💬 User message: {user_message}")
+        
         # Build messages for Groq
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT}
@@ -104,6 +120,8 @@ def api_chat():
             "content": user_message
         })
         
+        print("🤖 Calling Groq API...")
+        
         # Call Groq API
         chat_completion = groq_client.chat.completions.create(
             messages=messages,
@@ -117,6 +135,8 @@ def api_chat():
         # Extract AI response
         ai_response = chat_completion.choices[0].message.content
         
+        print(f"✅ AI response: {ai_response[:100]}...")
+        
         return jsonify({
             'success': True,
             'response': ai_response,
@@ -124,7 +144,7 @@ def api_chat():
         })
     
     except Exception as e:
-        print(f"Error in chat API: {str(e)}")
+        print(f"❌ Error in chat API: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'An error occurred processing your request. Please try again.'
@@ -152,9 +172,11 @@ def authorize():
         prompt='consent'
     )
     
+    # Store state in session
     session['state'] = state
+    session.modified = True  # Force session save
     
-    print(f"State: {state}")
+    print(f"State saved to session: {state}")
     print(f"Redirecting to Google...")
     
     return redirect(authorization_url)
@@ -163,24 +185,32 @@ def authorize():
 def oauth2callback():
     """Handle OAuth callback from Google"""
     print("\n=== OAuth callback received ===")
+    print(f"Callback state from URL: {request.args.get('state')}")
+    print(f"Session state: {session.get('state', 'NOT FOUND')}")
     
     if 'state' not in session:
-        print("ERROR: No state in session")
-        return 'Invalid session state', 400
+        print("❌ ERROR: No state in session")
+        return '''<h1>Session Error</h1>
+                 <p>OAuth session expired. This can happen if the app restarted.</p>
+                 <p><a href="/">Go back to home</a> and try again.</p>''', 400
     
     if session['state'] != request.args.get('state'):
-        print("ERROR: State mismatch")
-        return 'Invalid state parameter', 400
+        print("❌ ERROR: State mismatch")
+        print(f"   Expected: {session['state']}")
+        print(f"   Received: {request.args.get('state')}")
+        return '''<h1>State Mismatch Error</h1>
+                 <p>OAuth state verification failed. This can happen if the app restarted during login.</p>
+                 <p><a href="/">Go back to home</a> and try again.</p>''', 400
     
-    print("✓ State verified")
+    print("✅ State verified")
     
     try:
         print("Fetching token...")
         flow.fetch_token(authorization_response=request.url)
-        print("✓ Token received")
+        print("✅ Token received")
     except Exception as e:
-        print(f"ERROR fetching token: {e}")
-        return f'Error fetching token: {str(e)}', 400
+        print(f"❌ ERROR fetching token: {e}")
+        return f'<h1>Token Error</h1><p>Error fetching token: {str(e)}</p><p><a href="/">Go back</a></p>', 400
     
     credentials = flow.credentials
     session['access_token'] = credentials.token
@@ -194,11 +224,11 @@ def oauth2callback():
             'email': user_info.get('email'),
             'picture': user_info.get('picture')
         }
-        print(f"✓ User logged in: {user_info.get('email')}")
+        print(f"✅ User logged in: {user_info.get('email')}")
         return redirect(url_for('home'))
     else:
-        print("ERROR: Could not get user info")
-        return 'Error getting user info', 400
+        print("❌ ERROR: Could not get user info")
+        return '<h1>User Info Error</h1><p>Could not get user info from Google.</p><p><a href="/">Go back</a></p>', 400
 
 def get_user_info(access_token):
     """Get user info from Google"""
@@ -233,7 +263,7 @@ def logout():
     """Logout user and clear session"""
     print("\n=== User logging out ===")
     session.clear()
-    print("✓ Session cleared")
+    print("✅ Session cleared")
     return redirect(url_for('home'))
 
 # ==========================================
@@ -260,25 +290,27 @@ if __name__ == '__main__':
     # Check Groq API key
     if os.getenv('GROQ_API_KEY'):
         groq_key = os.getenv('GROQ_API_KEY')
-        print(f"✓ Groq API Key loaded: {groq_key[:15]}...")
+        print(f"✅ Groq API Key loaded: {groq_key[:15]}...")
     else:
-        print("✗ WARNING: GROQ_API_KEY not found in .env file!")
+        print("❌ WARNING: GROQ_API_KEY not found in .env file!")
     
     # Check OAuth credentials
     if oauth_config.get('web', {}).get('client_id'):
         client_id = oauth_config['web']['client_id']
-        print(f"✓ Google Client ID loaded: {client_id[:20]}...")
+        print(f"✅ Google Client ID loaded: {client_id[:20]}...")
     else:
-        print("✗ WARNING: GOOGLE_CLIENT_ID not found!")
+        print("❌ WARNING: GOOGLE_CLIENT_ID not found!")
     
     if oauth_config.get('web', {}).get('client_secret'):
         secret = oauth_config['web']['client_secret']
-        print(f"✓ Google Client Secret loaded: {secret[:15]}...")
+        print(f"✅ Google Client Secret loaded: {secret[:15]}...")
     else:
-        print("✗ WARNING: GOOGLE_CLIENT_SECRET not found!")
+        print("❌ WARNING: GOOGLE_CLIENT_SECRET not found!")
     
     print("="*50)
     print("\n🌐 Visit: http://localhost:5000")
+    print("💡 Tip: Auto-reload disabled to fix OAuth state issues")
     print("\n")
     
-    app.run(debug=True, port=5000)
+    # Run without auto-reload to prevent OAuth state issues
+    app.run(debug=True, use_reloader=False, port=5000)
