@@ -27,6 +27,10 @@
     <!-- Include AI Assistant Component -->
     {% include 'components/ai_assistant.html' %}
 
+    <!-- Settings & TTS (load first so AI assistant can use them) -->
+    <script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/tts.js') }}"></script>
+    
     <!-- AI Assistant JavaScript -->
     <script src="{{ url_for('static', filename='js/ai_assistant.js') }}"></script>
     
