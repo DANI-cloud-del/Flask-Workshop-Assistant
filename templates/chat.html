@@ -3,7 +3,6 @@
 {% block title %}Chat - Flask AI{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/chat_widget.css') }}">
 <style>
     /* Main Content Area */
     .main-content {
@@ -194,11 +193,9 @@
         </div>
 
         <div class="cta-hint">
-            <span>👇 Click the AI button at the bottom right to start chatting</span>
+            <span>👇 Click the AI button at the bottom center to start chatting</span>
             <span class="cta-arrow">→</span>
         </div>
     </div>
 </div>
-
-<script src="{{ url_for('static', filename='js/chat_widget.js') }}"></script>
 {% endblock %}
