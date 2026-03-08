@@ -1,4 +1,5 @@
-﻿from flask import Flask, redirect, session, url_for, request, render_template
+﻿from flask import Flask, jsonify, redirect, session, url_for, request, render_template
+from groq import Groq
 import google_auth_oauthlib.flow
 import os
 import requests
@@ -6,6 +7,12 @@ from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
+
+SYSTEM_PROMPT = """You are a helpful AI assistant for Flask Workshop Assistant.
+You help users with their questions in a friendly and informative way.
+Keep responses concise but complete."""
+
+
 
 # ⭐ CRITICAL: Allow HTTP for development
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
@@ -35,6 +42,57 @@ flow = google_auth_oauthlib.flow.Flow.from_client_config(
     ]
 )
 flow.redirect_uri = "http://localhost:5000/oauth2callback"
+
+
+
+@app.route('/api/chat', methods=['POST'])
+def chat():
+    data = request.get_json()
+    user_message = data.get('message')
+    
+    # Get or create conversation history
+    if 'conversation' not in session:
+        session['conversation'] = []
+    
+    # Add user message
+    session['conversation'].append({
+        "role": "user",
+        "content": user_message
+    })
+    
+    # Build messages with history
+    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+    messages.extend(session['conversation'][-10:])  # Last 10 messages
+    
+    # Get AI response
+    response = client.chat.completions.create(
+        messages=messages,
+        model="llama-3.3-70b-versatile",
+        temperature=0.7,
+        max_tokens=1024
+    )
+    
+    ai_response = response.choices[0].message.content
+    
+    # Add AI response to history
+    session['conversation'].append({
+        "role": "assistant",
+        "content": ai_response
+    })
+    
+    session.modified = True
+    
+    return jsonify({
+        'success': True,
+        'response': ai_response
+    })
+
+
+@app.route('/api/chat/clear', methods=['POST'])
+def clear_chat():
+    """Clear conversation history"""
+    session['conversation'] = []
+    return jsonify({'success': True})
 
 
 @app.route('/')
