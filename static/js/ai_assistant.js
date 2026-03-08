@@ -1,11 +1,12 @@
 /* ==========================================
-   AI ASSISTANT - CLEAN SEARCH BAR
+   AI ASSISTANT - WITH CHAT HISTORY
    Flask + Groq Integration
    ========================================== */
 
 let isSearchOpen = false;
 let isListening = false;
 let conversationHistory = []; // Store conversation for context
+let chatMessages = []; // Store all messages for display
 
 // Mouse following eyes (pill only)
 document.addEventListener('mousemove', (e) => {
@@ -43,14 +44,110 @@ function toggleAI() {
         container.classList.add('search-open');
         pill.classList.add('active');
         
+        // Show chat history container
+        ensureChatHistoryExists();
+        
         // Focus input after animation
         setTimeout(() => {
             const input = document.getElementById('aiSearchInput');
             if (input) input.focus();
+            scrollChatToBottom();
         }, 300);
     } else {
         // Close search bar
         closeSearchBar();
+    }
+}
+
+// Ensure chat history container exists
+function ensureChatHistoryExists() {
+    let chatHistory = document.getElementById('aiChatHistory');
+    
+    if (!chatHistory) {
+        // Create chat history container
+        chatHistory = document.createElement('div');
+        chatHistory.id = 'aiChatHistory';
+        chatHistory.className = 'ai-chat-history';
+        
+        // Add welcome message if no messages
+        if (chatMessages.length === 0) {
+            chatHistory.innerHTML = `
+                <div class="ai-welcome-message">
+                    <div class="ai-welcome-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M6 12.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5M3 8.062C3 6.76 4.235 5.765 5.53 5.886a26.6 26.6 0 0 0 4.94 0C11.765 5.765 13 6.76 13 8.062v1.157a.93.93 0 0 1-.765.935c-.845.147-2.34.346-4.235.346s-3.39-.2-4.235-.346A.93.93 0 0 1 3 9.219zm4.542-.827a.25.25 0 0 0-.217.068l-.92.9a25 25 0 0 1-1.871-.183.25.25 0 0 0-.068.495c.55.076 1.232.149 2.02.193a.25.25 0 0 0 .189-.071l.754-.736.847 1.71a.25.25 0 0 0 .404.062l.932-.97a25 25 0 0 0 1.922-.188.25.25 0 0 0-.068-.495c-.538.074-1.207.145-1.98.189a.25.25 0 0 0-.166.076l-.754.785-.842-1.7a.25.25 0 0 0-.182-.135"/>
+                            <path d="M8.5 1.866a1 1 0 1 0-1 0V3h-2A4.5 4.5 0 0 0 1 7.5V8a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1v1a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1v-.5A4.5 4.5 0 0 0 10.5 3h-2zM14 7.5V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7.5A3.5 3.5 0 0 1 5.5 4h5A3.5 3.5 0 0 1 14 7.5"/>
+                        </svg>
+                    </div>
+                    <h3>Hi there! 👋</h3>
+                    <p>I'm your AI assistant. Ask me anything!</p>
+                </div>
+            `;
+        } else {
+            // Render existing messages
+            renderAllMessages();
+        }
+        
+        // Insert before search bar
+        const searchBar = document.querySelector('.ai-search-bar');
+        searchBar.parentNode.insertBefore(chatHistory, searchBar);
+    }
+}
+
+// Render all messages in chat history
+function renderAllMessages() {
+    const chatHistory = document.getElementById('aiChatHistory');
+    if (!chatHistory) return;
+    
+    chatHistory.innerHTML = '';
+    
+    chatMessages.forEach(msg => {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `ai-message ai-message-${msg.type}`;
+        messageDiv.innerHTML = `
+            <div class="ai-message-content">
+                ${formatResponse(msg.content)}
+            </div>
+        `;
+        chatHistory.appendChild(messageDiv);
+    });
+    
+    scrollChatToBottom();
+}
+
+// Add message to chat history
+function addMessageToChat(content, type) {
+    chatMessages.push({ content, type, timestamp: Date.now() });
+    
+    const chatHistory = document.getElementById('aiChatHistory');
+    if (!chatHistory) return;
+    
+    // Remove welcome message if exists
+    const welcomeMsg = chatHistory.querySelector('.ai-welcome-message');
+    if (welcomeMsg) {
+        welcomeMsg.remove();
+    }
+    
+    // Create message element
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `ai-message ai-message-${type}`;
+    messageDiv.innerHTML = `
+        <div class="ai-message-content">
+            ${formatResponse(content)}
+        </div>
+    `;
+    
+    chatHistory.appendChild(messageDiv);
+    scrollChatToBottom();
+}
+
+// Scroll chat to bottom
+function scrollChatToBottom() {
+    const chatHistory = document.getElementById('aiChatHistory');
+    if (chatHistory) {
+        setTimeout(() => {
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }, 100);
     }
 }
 
@@ -122,6 +219,9 @@ async function sendMessage() {
     
     console.log('Sending message:', message);
     
+    // Add user message to chat
+    addMessageToChat(message, 'user');
+    
     // Get send button
     const sendBtn = document.getElementById('aiSendBtn');
     const originalBtnContent = sendBtn.innerHTML;
@@ -135,9 +235,16 @@ async function sendMessage() {
     `;
     sendBtn.disabled = true;
     
+    // Clear input immediately
+    input.value = '';
+    updateSendButton();
+    
     // Change pill to "thinking" state
     const pill = document.getElementById('aiPill');
     pill.classList.add('thinking');
+    
+    // Show typing indicator
+    showTypingIndicator();
     
     try {
         // Send to Flask backend
@@ -170,195 +277,59 @@ async function sendMessage() {
                 conversationHistory = conversationHistory.slice(-10);
             }
             
-            // Display response
-            displayAIResponse(data.response);
+            // Hide typing indicator
+            hideTypingIndicator();
             
-            // Auto-speak if TTS is enabled
-            if (window.speakText && window.flaskAISettings) {
-                const settings = window.flaskAISettings.getSettings();
-                if (settings.ttsEnabled && settings.ttsAutoplay) {
-                    window.speakText(data.response);
-                }
-            }
+            // Add AI response to chat
+            addMessageToChat(data.response, 'ai');
             
             console.log('✓ AI Response received');
         } else {
             // Error from backend
-            showError(data.error || 'Unknown error occurred');
+            hideTypingIndicator();
+            addMessageToChat('Sorry, I encountered an error. Please try again.', 'ai');
         }
         
     } catch (error) {
         console.error('Error sending message:', error);
-        showError('Failed to connect to AI. Please check your connection and try again.');
+        hideTypingIndicator();
+        addMessageToChat('Sorry, I could not connect to the server. Please check your connection.', 'ai');
     } finally {
         // Restore button
         sendBtn.innerHTML = originalBtnContent;
-        sendBtn.disabled = false;
         pill.classList.remove('thinking');
-        
-        // Clear input
-        input.value = '';
-        updateSendButton();
     }
 }
 
-// ==========================================
-// DISPLAY AI RESPONSE
-// ==========================================
-
-function displayAIResponse(response) {
-    // Create modal/notification to show response
-    const modal = document.createElement('div');
-    modal.className = 'ai-response-modal';
-    modal.innerHTML = `
-        <div class="ai-response-content">
-            <div class="ai-response-header">
-                <div class="flex items-center gap-2">
-                    <div class="ai-avatar">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M6 12.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5M3 8.062C3 6.76 4.235 5.765 5.53 5.886a26.6 26.6 0 0 0 4.94 0C11.765 5.765 13 6.76 13 8.062v1.157a.93.93 0 0 1-.765.935c-.845.147-2.34.346-4.235.346s-3.39-.2-4.235-.346A.93.93 0 0 1 3 9.219zm4.542-.827a.25.25 0 0 0-.217.068l-.92.9a25 25 0 0 1-1.871-.183.25.25 0 0 0-.068.495c.55.076 1.232.149 2.02.193a.25.25 0 0 0 .189-.071l.754-.736.847 1.71a.25.25 0 0 0 .404.062l.932-.97a25 25 0 0 0 1.922-.188.25.25 0 0 0-.068-.495c-.538.074-1.207.145-1.98.189a.25.25 0 0 0-.166.076l-.754.785-.842-1.7a.25.25 0 0 0-.182-.135"/>
-                            <path d="M8.5 1.866a1 1 0 1 0-1 0V3h-2A4.5 4.5 0 0 0 1 7.5V8a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1v1a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1v-.5A4.5 4.5 0 0 0 10.5 3h-2zM14 7.5V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7.5A3.5 3.5 0 0 1 5.5 4h5A3.5 3.5 0 0 1 14 7.5"/>
-                        </svg>
-                    </div>
-                    <span class="font-semibold text-gray-900">AI Assistant</span>
-                </div>
-                <button onclick="closeAIResponse()" class="text-gray-400 hover:text-gray-600 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
-                    </svg>
-                </button>
-            </div>
-            <div class="ai-response-body">
-                ${formatResponse(response)}
-            </div>
-            <div class="ai-response-actions">
-                <button onclick="copyResponse()" class="ai-action-btn" title="Copy response">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/>
-                        <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/>
-                    </svg>
-                    Copy
-                </button>
-                <button onclick="speakResponse()" class="ai-action-btn" title="Read aloud">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M11.536 14.01A8.47 8.47 0 0 0 14.026 8a8.47 8.47 0 0 0-2.49-6.01l-.708.707A7.48 7.48 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303z"/>
-                        <path d="M10.121 12.596A6.48 6.48 0 0 0 12.025 8a6.48 6.48 0 0 0-1.904-4.596l-.707.707A5.48 5.48 0 0 1 11.025 8a5.48 5.48 0 0 1-1.61 3.89z"/>
-                        <path d="M8.707 11.182A4.5 4.5 0 0 0 10.025 8a4.5 4.5 0 0 0-1.318-3.182L8 5.525A3.5 3.5 0 0 1 9.025 8 3.5 3.5 0 0 1 8 10.475zM6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06"/>
-                    </svg>
-                    Speak
-                </button>
-            </div>
+// Show typing indicator
+function showTypingIndicator() {
+    const chatHistory = document.getElementById('aiChatHistory');
+    if (!chatHistory) return;
+    
+    // Check if indicator already exists
+    if (document.getElementById('typingIndicator')) return;
+    
+    const indicator = document.createElement('div');
+    indicator.id = 'typingIndicator';
+    indicator.className = 'ai-typing-indicator';
+    indicator.innerHTML = `
+        <div class="typing-dots">
+            <span></span>
+            <span></span>
+            <span></span>
         </div>
     `;
     
-    // Add styles if not already added
-    if (!document.getElementById('ai-response-styles')) {
-        const styles = document.createElement('style');
-        styles.id = 'ai-response-styles';
-        styles.textContent = `
-            .ai-response-modal {
-                position: fixed;
-                top: 80px;
-                right: 20px;
-                max-width: 500px;
-                width: calc(100% - 40px);
-                background: white;
-                border-radius: 16px;
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-                z-index: 9999;
-                animation: slideInRight 0.3s ease-out;
-            }
-            @keyframes slideInRight {
-                from {
-                    opacity: 0;
-                    transform: translateX(100px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateX(0);
-                }
-            }
-            .ai-response-content {
-                padding: 20px;
-            }
-            .ai-response-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 16px;
-                padding-bottom: 12px;
-                border-bottom: 1px solid #e5e7eb;
-            }
-            .ai-avatar {
-                width: 32px;
-                height: 32px;
-                border-radius: 50%;
-                background: linear-gradient(135deg, #00b4d8, #48cae4);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: white;
-            }
-            .ai-response-body {
-                color: #374151;
-                line-height: 1.6;
-                margin-bottom: 16px;
-                max-height: 400px;
-                overflow-y: auto;
-            }
-            .ai-response-actions {
-                display: flex;
-                gap: 8px;
-                padding-top: 12px;
-                border-top: 1px solid #e5e7eb;
-            }
-            .ai-action-btn {
-                display: flex;
-                align-items: center;
-                gap: 6px;
-                padding: 8px 14px;
-                border-radius: 8px;
-                border: 1px solid #e5e7eb;
-                background: white;
-                color: #6b7280;
-                font-size: 14px;
-                cursor: pointer;
-                transition: all 0.2s;
-            }
-            .ai-action-btn:hover {
-                background: #f9fafb;
-                border-color: #00b4d8;
-                color: #00b4d8;
-            }
-            .ai-thinking {
-                animation: pulse 2s ease-in-out infinite;
-            }
-            @keyframes pulse {
-                0%, 100% { opacity: 1; }
-                50% { opacity: 0.6; }
-            }
-        `;
-        document.head.appendChild(styles);
+    chatHistory.appendChild(indicator);
+    scrollChatToBottom();
+}
+
+// Hide typing indicator
+function hideTypingIndicator() {
+    const indicator = document.getElementById('typingIndicator');
+    if (indicator) {
+        indicator.remove();
     }
-    
-    // Remove any existing modal
-    const existingModal = document.querySelector('.ai-response-modal');
-    if (existingModal) {
-        existingModal.remove();
-    }
-    
-    // Add to page
-    document.body.appendChild(modal);
-    
-    // Store response for actions
-    window.currentAIResponse = response;
-    
-    // Auto-close after 15 seconds
-    setTimeout(() => {
-        if (modal.parentNode) {
-            modal.remove();
-        }
-    }, 15000);
 }
 
 // Format response with basic markdown support
@@ -373,44 +344,9 @@ function formatResponse(text) {
     text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
     
     // Code `text`
-    text = text.replace(/`(.*?)`/g, '<code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-family: monospace;">$1</code>');
+    text = text.replace(/`(.*?)`/g, '<code style="background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 0.9em;">$1</code>');
     
     return text;
-}
-
-// Close AI response modal
-function closeAIResponse() {
-    const modal = document.querySelector('.ai-response-modal');
-    if (modal) {
-        modal.style.animation = 'slideOutRight 0.3s ease-out';
-        setTimeout(() => modal.remove(), 300);
-    }
-}
-
-// Copy response to clipboard
-function copyResponse() {
-    if (window.currentAIResponse) {
-        navigator.clipboard.writeText(window.currentAIResponse)
-            .then(() => {
-                const btn = event.target.closest('button');
-                const originalText = btn.innerHTML;
-                btn.innerHTML = '✓ Copied!';
-                setTimeout(() => {
-                    btn.innerHTML = originalText;
-                }, 2000);
-            })
-            .catch(err => {
-                console.error('Failed to copy:', err);
-                alert('Failed to copy to clipboard');
-            });
-    }
-}
-
-// Speak response using TTS
-function speakResponse() {
-    if (window.currentAIResponse && window.speakText) {
-        window.speakText(window.currentAIResponse);
-    }
 }
 
 // Show error message
@@ -531,17 +467,30 @@ document.addEventListener('click', (e) => {
 
 // Escape key to close
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        if (isSearchOpen) {
-            closeSearchBar();
-        }
-        closeAIResponse();
+    if (e.key === 'Escape' && isSearchOpen) {
+        closeSearchBar();
     }
 });
 
-// Clear conversation history (optional utility)
+// Clear conversation history
 function clearConversation() {
     conversationHistory = [];
+    chatMessages = [];
+    const chatHistory = document.getElementById('aiChatHistory');
+    if (chatHistory) {
+        chatHistory.innerHTML = `
+            <div class="ai-welcome-message">
+                <div class="ai-welcome-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M6 12.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5M3 8.062C3 6.76 4.235 5.765 5.53 5.886a26.6 26.6 0 0 0 4.94 0C11.765 5.765 13 6.76 13 8.062v1.157a.93.93 0 0 1-.765.935c-.845.147-2.34.346-4.235.346s-3.39-.2-4.235-.346A.93.93 0 0 1 3 9.219z"/>
+                        <path d="M8.5 1.866a1 1 0 1 0-1 0V3h-2A4.5 4.5 0 0 0 1 7.5V8a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1v1a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1v-.5A4.5 4.5 0 0 0 10.5 3h-2z"/>
+                    </svg>
+                </div>
+                <h3>Hi there! 👋</h3>
+                <p>I'm your AI assistant. Ask me anything!</p>
+            </div>
+        `;
+    }
     console.log('Conversation history cleared');
 }
 
