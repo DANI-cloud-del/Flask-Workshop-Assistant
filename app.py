@@ -40,28 +40,13 @@ flow.redirect_uri = "http://localhost:5000/oauth2callback"
 @app.route('/')
 def home():
     if "user" in session:
-        user = session["user"]
-        return f'''
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Welcome</title>
-                <style>
-                    body {{ font-family: Arial; text-align: center; padding: 50px; }}
-                    img {{ border-radius: 50%; margin: 20px; }}
-                    a {{ color: #4285f4; text-decoration: none; }}
-                </style>
-            </head>
-            <body>
-                <h1>Welcome {user["name"]}! 🎉</h1>
-                <img src="{user["picture"]}" width="100">
-                <p><strong>Email:</strong> {user["email"]}</p>
-                <p><a href="/logout">Logout</a></p>
-            </body>
-            </html>
-        '''
-    return render_template('login.html')
+        return render_template('chat.html', user=session.get('user'))
+    else:
+        return render_template('login.html')
 
+@app.route('/settings')
+def settings():
+    return render_template('settings.html', user=session.get('user'))
 
 @app.route('/authorize')
 def authorize():

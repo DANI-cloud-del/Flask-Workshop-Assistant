@@ -11,63 +11,12 @@
     <!-- AI Assistant CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/ai_assistant.css') }}">
     
-    <style>
-        /* Custom colors */
-        :root {
-            --primary: #00b4d8;
-            --secondary: #48cae4;
-            --hover: #caf0f8;
-            --ai-purple: #9d4edd;
-            --ai-purple-dark: #7b2cbf;
-        }
-        
-        /* Glow effect animation */
-        @keyframes neon-glow {
-            0%, 100% { 
-                box-shadow: 0 0 5px var(--primary), 
-                            0 0 10px var(--primary),
-                            0 0 15px var(--primary); 
-            }
-            50% { 
-                box-shadow: 0 0 10px var(--secondary), 
-                            0 0 20px var(--secondary),
-                            0 0 30px var(--secondary),
-                            0 0 40px var(--secondary); 
-            }
-        }
-        
-        .neon-glow:hover {
-            animation: neon-glow 1.5s infinite;
-        }
-        
-        /* Smooth underline effect */
-        .nav-link {
-            position: relative;
-            transition: all 0.3s ease;
-        }
-        
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            transition: width 0.4s ease;
-        }
-        
-        .nav-link:hover::after {
-            width: 100%;
-        }
-        
-        {% block extra_css %}{% endblock %}
-    </style>
+    
 </head>
-<body class="bg-white text-gray-900 min-h-screen">
     
     {% block content %}{% endblock %}
 
+    {% include 'components/navbar.html' %}
     <!-- Include AI Assistant Component -->
     {% include 'components/ai_assistant.html' %}
 

@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Flask AI</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- AI Assistant CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ai_assistant.css') }}">
+    
+    <style>
+        /* Toggle Switch */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #00b4d8;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #00b4d8;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
+
+    {% include "components/navbar.html" %}
+    
+    <div class="pt-24 pb-16 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto">
+            
+            <!-- Page Header -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+                    <i class="bi bi-gear text-[#00b4d8]"></i>
+                    Settings
+                </h1>
+                <p class="text-gray-600">Customize your AI assistant experience</p>
+            </div>
+            
+            <!-- Settings Sections -->
+            <div class="space-y-6">
+                
+                <!-- ========================================
+                     TEXT-TO-SPEECH SETTINGS
+                     ======================================== -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <i class="bi bi-volume-up text-[#00b4d8]"></i>
+                        Text-to-Speech
+                    </h2>
+                    
+                    <!-- Enable TTS -->
+                    <div class="flex items-center justify-between py-4 border-b border-gray-100">
+                        <div>
+                            <label class="font-medium text-gray-900">Enable Text-to-Speech</label>
+                            <p class="text-sm text-gray-500">Automatically read AI responses aloud</p>
+                        </div>
+                        <div class="relative">
+                            <input type="checkbox" id="ttsEnabled" class="toggle-checkbox sr-only" onchange="toggleTTS()">
+                            <label for="ttsEnabled" class="toggle-label block w-14 h-8 rounded-full bg-gray-300 cursor-pointer transition-colors"></label>
+                            <span class="toggle-checkbox absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-all pointer-events-none"></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Voice Selection -->
+                    <div class="py-4 border-b border-gray-100">
+                        <label class="font-medium text-gray-900 block mb-2">Voice</label>
+                        <select id="ttsVoice" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00b4d8] focus:border-transparent outline-none" onchange="saveVoice()">
+                            <option value="">Loading voices...</option>
+                        </select>
+                        <button onclick="testVoice()" class="mt-2 text-sm text-[#00b4d8] hover:text-[#48cae4] flex items-center gap-1">
+                            <i class="bi bi-play-circle"></i>
+                            Test Voice
+                        </button>
+                    </div>
+                    
+                    <!-- Speech Rate -->
+                    <div class="py-4 border-b border-gray-100">
+                        <label class="font-medium text-gray-900 block mb-2">
+                            Speech Rate: <span id="rateValue">1.0</span>x
+                        </label>
+                        <input type="range" id="ttsRate" min="0.5" max="2" step="0.1" value="1" class="w-full accent-[#00b4d8]" oninput="updateRate(this.value)">
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>0.5x (Slow)</span>
+                            <span>2.0x (Fast)</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Pitch -->
+                    <div class="py-4 border-b border-gray-100">
+                        <label class="font-medium text-gray-900 block mb-2">
+                            Pitch: <span id="pitchValue">1.0</span>
+                        </label>
+                        <input type="range" id="ttsPitch" min="0.5" max="2" step="0.1" value="1" class="w-full accent-[#00b4d8]" oninput="updatePitch(this.value)">
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>0.5 (Low)</span>
+                            <span>2.0 (High)</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Auto-play -->
+                    <div class="flex items-center justify-between py-4">
+                        <div>
+                            <label class="font-medium text-gray-900">Auto-play Responses</label>
+                            <p class="text-sm text-gray-500">Automatically speak when AI responds</p>
+                        </div>
+                        <div class="relative">
+                            <input type="checkbox" id="ttsAutoplay" class="toggle-checkbox sr-only" onchange="toggleAutoplay()">
+                            <label for="ttsAutoplay" class="toggle-label block w-14 h-8 rounded-full bg-gray-300 cursor-pointer transition-colors"></label>
+                            <span class="toggle-checkbox absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-all pointer-events-none"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ========================================
+                     VOICE INPUT SETTINGS
+                     ======================================== -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <i class="bi bi-mic text-[#00b4d8]"></i>
+                        Voice Input
+                    </h2>
+                    
+                    <!-- Enable Voice Input -->
+                    <div class="flex items-center justify-between py-4 border-b border-gray-100">
+                        <div>
+                            <label class="font-medium text-gray-900">Enable Microphone</label>
+                            <p class="text-sm text-gray-500">Allow voice input for messages</p>
+                        </div>
+                        <div class="relative">
+                            <input type="checkbox" id="micEnabled" class="toggle-checkbox sr-only" checked onchange="toggleMic()">
+                            <label for="micEnabled" class="toggle-label block w-14 h-8 rounded-full bg-[#00b4d8] cursor-pointer transition-colors"></label>
+                            <span class="toggle-checkbox absolute right-1 top-1 bg-white w-6 h-6 rounded-full transition-all pointer-events-none"></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Voice Language -->
+                    <div class="py-4">
+                        <label class="font-medium text-gray-900 block mb-2">Recognition Language</label>
+                        <select id="micLanguage" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00b4d8] focus:border-transparent outline-none">
+                            <option value="en-US">English (US)</option>
+                            <option value="en-GB">English (UK)</option>
+                            <option value="es-ES">Spanish</option>
+                            <option value="fr-FR">French</option>
+                            <option value="de-DE">German</option>
+                            <option value="hi-IN">Hindi</option>
+                            <option value="zh-CN">Chinese (Simplified)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- ========================================
+                     APPEARANCE SETTINGS
+                     ======================================== -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <i class="bi bi-palette text-[#00b4d8]"></i>
+                        Appearance
+                    </h2>
+                    
+                    <!-- Theme -->
+                    <div class="flex items-center justify-between py-4 border-b border-gray-100">
+                        <div>
+                            <label class="font-medium text-gray-900">Dark Mode</label>
+                            <p class="text-sm text-gray-500">Use dark theme for the interface</p>
+                        </div>
+                        <div class="relative">
+                            <input type="checkbox" id="darkMode" class="toggle-checkbox sr-only" onchange="toggleDarkMode()">
+                            <label for="darkMode" class="toggle-label block w-14 h-8 rounded-full bg-gray-300 cursor-pointer transition-colors"></label>
+                            <span class="toggle-checkbox absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-all pointer-events-none"></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Font Size -->
+                    <div class="py-4">
+                        <label class="font-medium text-gray-900 block mb-2">
+                            Font Size: <span id="fontSizeValue">16</span>px
+                        </label>
+                        <input type="range" id="fontSize" min="12" max="20" step="1" value="16" class="w-full accent-[#00b4d8]" oninput="updateFontSize(this.value)">
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>Small</span>
+                            <span>Large</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ========================================
+                     CHAT BEHAVIOR SETTINGS
+                     ======================================== -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <i class="bi bi-chat-square-text text-[#00b4d8]"></i>
+                        Chat Behavior
+                    </h2>
+                    
+                    <!-- Enter to Send -->
+                    <div class="flex items-center justify-between py-4 border-b border-gray-100">
+                        <div>
+                            <label class="font-medium text-gray-900">Enter to Send</label>
+                            <p class="text-sm text-gray-500">Press Enter to send (Shift+Enter for new line)</p>
+                        </div>
+                        <div class="relative">
+                            <input type="checkbox" id="enterToSend" class="toggle-checkbox sr-only" checked onchange="toggleEnterToSend()">
+                            <label for="enterToSend" class="toggle-label block w-14 h-8 rounded-full bg-[#00b4d8] cursor-pointer transition-colors"></label>
+                            <span class="toggle-checkbox absolute right-1 top-1 bg-white w-6 h-6 rounded-full transition-all pointer-events-none"></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Sound Effects -->
+                    <div class="flex items-center justify-between py-4">
+                        <div>
+                            <label class="font-medium text-gray-900">Sound Effects</label>
+                            <p class="text-sm text-gray-500">Play sounds for messages and notifications</p>
+                        </div>
+                        <div class="relative">
+                            <input type="checkbox" id="soundEffects" class="toggle-checkbox sr-only" checked onchange="toggleSoundEffects()">
+                            <label for="soundEffects" class="toggle-label block w-14 h-8 rounded-full bg-[#00b4d8] cursor-pointer transition-colors"></label>
+                            <span class="toggle-checkbox absolute right-1 top-1 bg-white w-6 h-6 rounded-full transition-all pointer-events-none"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Save Button -->
+                <div class="flex gap-4 justify-end">
+                    <button onclick="resetSettings()" class="px-6 py-3 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-all flex items-center gap-2">
+                        <i class="bi bi-arrow-clockwise"></i>
+                        Reset to Defaults
+                    </button>
+                    <button onclick="saveSettings()" class="px-6 py-3 bg-gradient-to-r from-[#00b4d8] to-[#48cae4] text-white font-medium rounded-xl shadow-lg shadow-[#00b4d8]/30 hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2">
+                        <i class="bi bi-check-circle"></i>
+                        Save Settings
+                    </button>
+                </div>
+                
+            </div>
+            
+        </div>
+    </div>
+
+    {% include 'components/ai_assistant.html' %}
+
+    <script src="{{ url_for('static', filename='js/ai_assistant.js') }}"></script>
+    
+    <script>
+        // ==========================================
+        // SETTINGS MANAGEMENT
+        // ==========================================
+        
+        // Default settings
+        const defaultSettings = {
+            ttsEnabled: false,
+            ttsVoice: '',
+            ttsRate: 1.0,
+            ttsPitch: 1.0,
+            ttsAutoplay: false,
+            micEnabled: true,
+            micLanguage: 'en-US',
+            darkMode: false,
+            fontSize: 16,
+            enterToSend: true,
+            soundEffects: true
+        };
+        
+        // Load settings from localStorage
+        function loadSettings() {
+            const saved = localStorage.getItem('flaskAISettings');
+            return saved ? {...defaultSettings, ...JSON.parse(saved)} : defaultSettings;
+        }
+        
+        // Save settings to localStorage
+        function saveSettingsToStorage(settings) {
+            localStorage.setItem('flaskAISettings', JSON.stringify(settings));
+        }
+        
+        // Initialize settings
+        let settings = loadSettings();
+        
+        // ==========================================
+        // TEXT-TO-SPEECH FUNCTIONS
+        // ==========================================
+        
+        let voices = [];
+        let synth = window.speechSynthesis;
+        
+        // Load available voices
+        function loadVoices() {
+            voices = synth.getVoices();
+            const voiceSelect = document.getElementById('ttsVoice');
+            voiceSelect.innerHTML = '';
+            
+            voices.forEach((voice, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${voice.name} (${voice.lang})`;
+                if (voice.default) {
+                    option.textContent += ' - DEFAULT';
+                }
+                voiceSelect.appendChild(option);
+            });
+            
+            // Set saved voice
+            if (settings.ttsVoice !== '') {
+                voiceSelect.value = settings.ttsVoice;
+            }
+        }
+        
+        // Load voices when available
+        if (synth.onvoiceschanged !== undefined) {
+            synth.onvoiceschanged = loadVoices;
+        }
+        loadVoices();
+        
+        function toggleTTS() {
+            settings.ttsEnabled = document.getElementById('ttsEnabled').checked;
+            saveSettingsToStorage(settings);
+        }
+        
+        function saveVoice() {
+            settings.ttsVoice = document.getElementById('ttsVoice').value;
+            saveSettingsToStorage(settings);
+        }
+        
+        function updateRate(value) {
+            settings.ttsRate = parseFloat(value);
+            document.getElementById('rateValue').textContent = value;
+            saveSettingsToStorage(settings);
+        }
+        
+        function updatePitch(value) {
+            settings.ttsPitch = parseFloat(value);
+            document.getElementById('pitchValue').textContent = value;
+            saveSettingsToStorage(settings);
+        }
+        
+        function toggleAutoplay() {
+            settings.ttsAutoplay = document.getElementById('ttsAutoplay').checked;
+            saveSettingsToStorage(settings);
+        }
+        
+        function testVoice() {
+            const utterance = new SpeechSynthesisUtterance('Hello! This is how I sound.');
+            utterance.voice = voices[document.getElementById('ttsVoice').value];
+            utterance.rate = settings.ttsRate;
+            utterance.pitch = settings.ttsPitch;
+            synth.speak(utterance);
+        }
+        
+        // Function to speak text (call this from chat.js)
+        function speakText(text) {
+            if (!settings.ttsEnabled) return;
+            
+            synth.cancel(); // Stop any ongoing speech
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.voice = voices[settings.ttsVoice] || voices[0];
+            utterance.rate = settings.ttsRate;
+            utterance.pitch = settings.ttsPitch;
+            synth.speak(utterance);
+        }
+        
+        // ==========================================
+        // OTHER SETTINGS FUNCTIONS
+        // ==========================================
+        
+        function toggleMic() {
+            settings.micEnabled = document.getElementById('micEnabled').checked;
+            saveSettingsToStorage(settings);
+        }
+        
+        function toggleDarkMode() {
+            settings.darkMode = document.getElementById('darkMode').checked;
+            document.body.classList.toggle('dark', settings.darkMode);
+            saveSettingsToStorage(settings);
+        }
+        
+        function updateFontSize(value) {
+            settings.fontSize = parseInt(value);
+            document.getElementById('fontSizeValue').textContent = value;
+            document.body.style.fontSize = value + 'px';
+            saveSettingsToStorage(settings);
+        }
+        
+        function toggleEnterToSend() {
+            settings.enterToSend = document.getElementById('enterToSend').checked;
+            saveSettingsToStorage(settings);
+        }
+        
+        function toggleSoundEffects() {
+            settings.soundEffects = document.getElementById('soundEffects').checked;
+            saveSettingsToStorage(settings);
+        }
+        
+        function saveSettings() {
+            saveSettingsToStorage(settings);
+            
+            // Show success message
+            const btn = event.target.closest('button');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Saved!';
+            btn.classList.add('bg-green-500');
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.classList.remove('bg-green-500');
+            }, 2000);
+        }
+        
+        function resetSettings() {
+            if (confirm('Reset all settings to defaults?')) {
+                settings = {...defaultSettings};
+                saveSettingsToStorage(settings);
+                location.reload();
+            }
+        }
+        
+        // ==========================================
+        // INITIALIZE UI
+        // ==========================================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Apply saved settings
+            document.getElementById('ttsEnabled').checked = settings.ttsEnabled;
+            document.getElementById('ttsRate').value = settings.ttsRate;
+            document.getElementById('ttsPitch').value = settings.ttsPitch;
+            document.getElementById('ttsAutoplay').checked = settings.ttsAutoplay;
+            document.getElementById('micEnabled').checked = settings.micEnabled;
+            document.getElementById('micLanguage').value = settings.micLanguage;
+            document.getElementById('darkMode').checked = settings.darkMode;
+            document.getElementById('fontSize').value = settings.fontSize;
+            document.getElementById('enterToSend').checked = settings.enterToSend;
+            document.getElementById('soundEffects').checked = settings.soundEffects;
+            
+            document.getElementById('rateValue').textContent = settings.ttsRate;
+            document.getElementById('pitchValue').textContent = settings.ttsPitch;
+            document.getElementById('fontSizeValue').textContent = settings.fontSize;
+            
+            // Apply dark mode if enabled
+            if (settings.darkMode) {
+                document.body.classList.add('dark');
+            }
+            
+            // Apply font size
+            document.body.style.fontSize = settings.fontSize + 'px';
+        });
+        
+        // Export settings for use in other pages
+        window.flaskAISettings = settings;
+        window.speakText = speakText;
+    </script>
+    
+</body>
+</html>
