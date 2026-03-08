@@ -27,6 +27,8 @@ function loadSettings() {
 // Save settings to localStorage
 function saveSettingsToStorage(settings) {
     localStorage.setItem('flaskAISettings', JSON.stringify(settings));
+    // Trigger event so other pages know settings changed
+    window.dispatchEvent(new CustomEvent('settingsChanged', { detail: settings }));
 }
 
 // Get current settings (use this in other files)
@@ -44,6 +46,51 @@ let settings = loadSettings();
 let voices = [];
 let synth = window.speechSynthesis;
 
+// Find best female natural voice
+function findBestVoice(voices) {
+    // Priority list of preferred voices
+    const preferredVoices = [
+        // Microsoft Edge voices
+        'Microsoft Ava',
+        'Microsoft Jenny',
+        'Microsoft Aria',
+        // Google Chrome voices
+        'Google Australian English Female',
+        'Google UK English Female',
+        'Google US English Female',
+        // iOS voices
+        'Samantha',
+        'Karen (Enhanced)',
+        'Karen',
+        // Android voices
+        'en-au-x-aua-network',
+        'en-gb-x-gbg-network',
+        'en-us-x-sfg-network',
+        // Any female voice
+        'Female',
+    ];
+    
+    // Try to find preferred voices in order
+    for (const preferred of preferredVoices) {
+        const voice = voices.find(v => 
+            v.name.includes(preferred) || 
+            v.name.toLowerCase().includes(preferred.toLowerCase())
+        );
+        if (voice) return voice;
+    }
+    
+    // Fallback: find any female English voice
+    const femaleVoice = voices.find(v => 
+        v.lang.startsWith('en') && 
+        (v.name.toLowerCase().includes('female') || 
+         v.name.toLowerCase().includes('woman'))
+    );
+    if (femaleVoice) return femaleVoice;
+    
+    // Last resort: default voice
+    return voices.find(v => v.default) || voices[0];
+}
+
 // Load available voices
 function loadVoices() {
     voices = synth.getVoices();
@@ -53,18 +100,59 @@ function loadVoices() {
     
     voiceSelect.innerHTML = '';
     
-    voices.forEach((voice, index) => {
-        const option = document.createElement('option');
-        option.value = index;
-        option.textContent = `${voice.name} (${voice.lang})`;
-        if (voice.default) {
-            option.textContent += ' - DEFAULT';
-        }
-        voiceSelect.appendChild(option);
-    });
+    // Group voices by language
+    const englishVoices = voices.filter(v => v.lang.startsWith('en'));
+    const otherVoices = voices.filter(v => !v.lang.startsWith('en'));
     
-    // Set saved voice
-    if (settings.ttsVoice !== '') {
+    // Add English voices first
+    if (englishVoices.length > 0) {
+        const group = document.createElement('optgroup');
+        group.label = 'English Voices';
+        englishVoices.forEach((voice, index) => {
+            const option = document.createElement('option');
+            option.value = voices.indexOf(voice);
+            option.textContent = `${voice.name} (${voice.lang})`;
+            
+            // Mark special voices
+            if (voice.name.includes('Natural') || voice.name.includes('Neural')) {
+                option.textContent += ' ✨';
+            }
+            if (voice.name.toLowerCase().includes('female')) {
+                option.textContent += ' 👩';
+            }
+            
+            group.appendChild(option);
+        });
+        voiceSelect.appendChild(group);
+    }
+    
+    // Add other voices
+    if (otherVoices.length > 0) {
+        const group = document.createElement('optgroup');
+        group.label = 'Other Languages';
+        otherVoices.forEach((voice, index) => {
+            const option = document.createElement('option');
+            option.value = voices.indexOf(voice);
+            option.textContent = `${voice.name} (${voice.lang})`;
+            group.appendChild(option);
+        });
+        voiceSelect.appendChild(group);
+    }
+    
+    // Auto-select best voice if not set
+    if (settings.ttsVoice === '' && voices.length > 0) {
+        const bestVoice = findBestVoice(voices);
+        const bestIndex = voices.indexOf(bestVoice);
+        settings.ttsVoice = bestIndex.toString();
+        saveSettingsToStorage(settings);
+        voiceSelect.value = bestIndex;
+        
+        // Add indicator
+        const recommendedText = document.createElement('p');
+        recommendedText.className = 'text-sm text-green-600 mt-1';
+        recommendedText.innerHTML = `✓ Auto-selected: ${bestVoice.name}`;
+        voiceSelect.parentNode.appendChild(recommendedText);
+    } else if (settings.ttsVoice !== '') {
         voiceSelect.value = settings.ttsVoice;
     }
 }
@@ -73,16 +161,22 @@ function loadVoices() {
 if (synth.onvoiceschanged !== undefined) {
     synth.onvoiceschanged = loadVoices;
 }
+
+// Try to load voices immediately and after delay
 loadVoices();
+setTimeout(loadVoices, 100);
+setTimeout(loadVoices, 500);
 
 function toggleTTS() {
     settings.ttsEnabled = document.getElementById('ttsEnabled').checked;
     saveSettingsToStorage(settings);
+    console.log('TTS enabled:', settings.ttsEnabled);
 }
 
 function saveVoice() {
     settings.ttsVoice = document.getElementById('ttsVoice').value;
     saveSettingsToStorage(settings);
+    console.log('Voice saved:', voices[settings.ttsVoice]?.name);
 }
 
 function updateRate(value) {
@@ -100,13 +194,25 @@ function updatePitch(value) {
 function toggleAutoplay() {
     settings.ttsAutoplay = document.getElementById('ttsAutoplay').checked;
     saveSettingsToStorage(settings);
+    console.log('TTS autoplay:', settings.ttsAutoplay);
 }
 
 function testVoice() {
+    // Make sure voices are loaded
+    if (voices.length === 0) {
+        voices = synth.getVoices();
+    }
+    
+    const voiceIndex = document.getElementById('ttsVoice').value;
     const utterance = new SpeechSynthesisUtterance('Hello! This is how I sound. I can read your AI responses with this voice, rate, and pitch.');
-    utterance.voice = voices[document.getElementById('ttsVoice').value];
+    
+    if (voices[voiceIndex]) {
+        utterance.voice = voices[voiceIndex];
+    }
     utterance.rate = settings.ttsRate;
     utterance.pitch = settings.ttsPitch;
+    
+    synth.cancel(); // Stop any ongoing speech
     synth.speak(utterance);
 }
 
@@ -188,6 +294,25 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('rateValue').textContent = settings.ttsRate;
     document.getElementById('pitchValue').textContent = settings.ttsPitch;
     document.getElementById('fontSizeValue').textContent = settings.fontSize;
+    
+    // Update toggle visual states
+    const toggles = [
+        'ttsEnabled', 'ttsAutoplay', 'micEnabled', 
+        'darkMode', 'enterToSend', 'soundEffects'
+    ];
+    
+    toggles.forEach(id => {
+        const checkbox = document.getElementById(id);
+        const label = checkbox.nextElementSibling;
+        const indicator = label.nextElementSibling;
+        
+        if (checkbox.checked) {
+            label.classList.add('bg-[#00b4d8]');
+            label.classList.remove('bg-gray-300');
+            indicator.classList.add('right-1');
+            indicator.classList.remove('left-1');
+        }
+    });
     
     // Apply dark mode if enabled
     if (settings.darkMode) {
